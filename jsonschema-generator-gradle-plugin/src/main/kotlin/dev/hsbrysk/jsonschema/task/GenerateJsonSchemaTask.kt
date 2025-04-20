@@ -1,6 +1,10 @@
 package dev.hsbrysk.jsonschema.task
 
-import com.github.victools.jsonschema.generator.*
+import com.github.victools.jsonschema.generator.Option
+import com.github.victools.jsonschema.generator.OptionPreset
+import com.github.victools.jsonschema.generator.SchemaGenerator
+import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder
+import com.github.victools.jsonschema.generator.SchemaVersion
 import com.github.victools.jsonschema.module.jackson.JacksonModule
 import com.github.victools.jsonschema.module.jackson.JacksonOption
 import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationModule
