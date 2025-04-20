@@ -62,6 +62,9 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
 
     @TaskAction
     fun generateJsonSchema() {
+        (mainDependencies() + pluginClasspath).forEach {
+            println("Generating $it")
+        }
         val classLoader = buildClassLoader(mainDependencies() + pluginClasspath)
         val generator = buildSchemaGenerator()
 

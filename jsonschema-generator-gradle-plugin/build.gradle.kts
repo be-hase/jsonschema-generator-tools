@@ -20,7 +20,7 @@ gradlePlugin {
             Java JSON Schema Generator – creating JSON Schema (Draft 6, Draft 7, Draft 2019-09, or Draft 2020-12) from Java classes
         """.trimIndent()
         tags = listOf("json-schema")
-        implementationClass = "dev.hsbrysk.jsonschema.gradle.JsonSchemaGeneratorPlugin"
+        implementationClass = "dev.hsbrysk.jsonschema.JsonSchemaGeneratorPlugin"
     }
 
     website = "https://github.com/be-hase/gradle-jsonschema-generator"

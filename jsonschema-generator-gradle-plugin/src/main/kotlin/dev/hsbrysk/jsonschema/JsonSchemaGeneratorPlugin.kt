@@ -15,10 +15,9 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
     private lateinit var s3Extension: S3Extension
 
     override fun apply(project: Project) {
-        extension =
-            project.extensions.create("jsonSchemaGenerator", JsonSchemaGeneratorExtension::class.java).apply {
-                optionPreset.convention(OptionPreset.FULL_DOCUMENTATION)
-            }
+        extension = project.extensions.create("jsonSchemaGenerator", JsonSchemaGeneratorExtension::class.java).apply {
+            optionPreset.convention(OptionPreset.PLAIN_JSON)
+        }
         optionsExtension = extension.extensions.create("options", OptionsExtension::class.java).apply {
             with.convention(emptySet())
             without.convention(emptySet())
@@ -55,6 +54,8 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
             task.swagger2Enabled.set(modulesExtension.swagger2Enabled)
             task.pluginClasspath.setFrom(project.configurations.named(CONFIGURATION_JSONSCHEMA_GENERATOR))
             task.schemas.set(project.provider { extension.schemas.associate { it.name to it.target.get() } })
+
+            task.dependsOn("classes")
         }
 
         project.tasks.register(
