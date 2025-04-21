@@ -163,7 +163,23 @@ class ServiceLoaderFunctionalTest {
             """
             package com.example;
             import com.example.SecretString;
-            public record Person(String loginId, SecretString password) {}
+            public class Person {
+                private final String loginId;
+                private final SecretString password;
+
+                public Person(String loginId, SecretString password) {
+                    this.loginId = loginId;
+                    this.password = password;
+                }
+
+                public String getLoginId() {
+                    return loginId;
+                }
+
+                public SecretString getPassword() {
+                    return password;
+                }
+            }
             """.trimIndent(),
         )
 

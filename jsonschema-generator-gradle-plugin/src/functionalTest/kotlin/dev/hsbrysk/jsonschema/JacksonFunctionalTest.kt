@@ -62,7 +62,17 @@ class JacksonFunctionalTest {
             // language=java
             """
             package com.example;
-            public record Pojo(Animal animal) {}
+            public class Pojo {
+                private final Animal animal;
+
+                public Pojo(Animal animal) {
+                    this.animal = animal;
+                }
+
+                public Animal getAnimal() {
+                    return animal;
+                }
+            }
             """.trimIndent(),
         )
         projectDir.resolve(Path("src", "main", "java", "com", "example", "Animal.java").toFile()).writeText(
@@ -91,10 +101,25 @@ class JacksonFunctionalTest {
             import com.fasterxml.jackson.annotation.JsonPropertyDescription;
             import com.fasterxml.jackson.annotation.JsonTypeName;
             @JsonTypeName("dog")
-            public record Dog(
-                    String name,
-                    @JsonPropertyDescription("breed description") String breed
-            ) implements Animal {}
+            public class Dog implements Animal {
+                private final String name;
+
+                @JsonPropertyDescription("breed description")
+                private final String breed;
+
+                public Dog(String name, String breed) {
+                    this.name = name;
+                    this.breed = breed;
+                }
+
+                public String getName() {
+                    return name;
+                }
+
+                public String getBreed() {
+                    return breed;
+                }
+            }
             """.trimIndent(),
         )
         projectDir.resolve(Path("src", "main", "java", "com", "example", "Cat.java").toFile()).writeText(
@@ -103,10 +128,23 @@ class JacksonFunctionalTest {
             package com.example;
             import com.fasterxml.jackson.annotation.JsonTypeName;
             @JsonTypeName("cat")
-            public record Cat(
-                    String name,
-                    String color
-            ) implements Animal {}
+            public class Cat implements Animal {
+                private final String name;
+                private final String color;
+
+                public Cat(String name, String color) {
+                    this.name = name;
+                    this.color = color;
+                }
+
+                public String getName() {
+                    return name;
+                }
+
+                public String getColor() {
+                    return color;
+                }
+            }
             """.trimIndent(),
         )
 
