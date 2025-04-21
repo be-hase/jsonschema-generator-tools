@@ -107,7 +107,6 @@ class ServiceLoaderFunctionalTest {
         )
 
         GradleRunner.create()
-            .forwardOutput()
             .withPluginClasspath()
             .withProjectDir(projectDir)
             .withArguments("generateJsonSchema")
@@ -169,7 +168,6 @@ class ServiceLoaderFunctionalTest {
         )
 
         GradleRunner.create()
-            .forwardOutput()
             .withPluginClasspath()
             .withProjectDir(projectDir)
             .withArguments("generateJsonSchema")
