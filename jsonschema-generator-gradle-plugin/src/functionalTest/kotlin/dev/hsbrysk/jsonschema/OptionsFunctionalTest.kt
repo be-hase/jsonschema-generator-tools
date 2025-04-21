@@ -35,8 +35,8 @@ class OptionsFunctionalTest {
             jsonSchemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 options {
-                    with = listOf(Option.FLATTENED_ENUMS_FROM_TOSTRING)
-                    without = listOf(Option.SCHEMA_VERSION_INDICATOR)
+                    with = setOf(Option.FLATTENED_ENUMS_FROM_TOSTRING)
+                    without = setOf(Option.SCHEMA_VERSION_INDICATOR)
                 }
                 schemas {
                     create("Person") {

@@ -98,14 +98,7 @@ class ServiceLoaderFunctionalTest {
         )
         projectDir.resolve(Path("src", "main", "resources", "META-INF", "services").toFile()).mkdirs()
         projectDir.resolve(
-            Path(
-                "src",
-                "main",
-                "resources",
-                "META-INF",
-                "services",
-                "dev.hsbrysk.jsonschema.ModuleProvider",
-            ).toFile(),
+            Path("src", "main", "resources", "META-INF", "services", "dev.hsbrysk.jsonschema.ModuleProvider").toFile(),
         ).writeText(
             """
             com.example.SecretStringModuleProvider
