@@ -5,6 +5,8 @@ plugins {
 }
 
 dependencies {
+    implementation(projects.jsonschemaModuleProvider)
+
     implementation(libs.aws.sdk.s3)
     implementation(libs.jakarta.validation.api)
     implementation(libs.jsonschema.generator.core)
@@ -25,6 +27,6 @@ gradlePlugin {
         implementationClass = "dev.hsbrysk.jsonschema.JsonSchemaGeneratorPlugin"
     }
 
-    website = "https://github.com/be-hase/gradle-jsonschema-generator"
-    vcsUrl = "https://github.com/be-hase/gradle-jsonschema-generator"
+    website = "https://github.com/be-hase/jsonschema-generator-gradle-plugin"
+    vcsUrl = "https://github.com/be-hase/jsonschema-generator-gradle-plugin"
 }

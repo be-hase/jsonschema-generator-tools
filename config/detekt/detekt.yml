@@ -4,6 +4,10 @@
 config:
   warningsAsErrors: true
 
+complexity:
+  LongMethod:
+    excludes: [ '**/src/test/**', '**/src/functionalTest/**' ]
+
 naming:
   FunctionNaming:
     excludes: [ '**/src/test/**', '**/src/functionalTest/**' ]

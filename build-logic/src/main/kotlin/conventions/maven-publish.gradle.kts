@@ -18,7 +18,7 @@ mavenPublishing {
         pom {
             name = project.name
             description = project.description
-            url = "https://github.com/be-hase/gradle-jsonschema-generator"
+            url = "https://github.com/be-hase/jsonschema-generator-gradle-plugin"
             licenses {
                 license {
                     name = "MIT License"
@@ -33,9 +33,9 @@ mavenPublishing {
                 }
             }
             scm {
-                connection.set("scm:git:git://github.com/be-hase/gradle-jsonschema-generator.git")
-                developerConnection.set("scm:git:ssh://github.com:be-hase/gradle-jsonschema-generator.git")
-                url.set("https://github.com/be-hase/gradle-jsonschema-generator")
+                connection.set("scm:git:git://github.com/be-hase/jsonschema-generator-gradle-plugin.git")
+                developerConnection.set("scm:git:ssh://github.com:be-hase/jsonschema-generator-gradle-plugin.git")
+                url.set("https://github.com/be-hase/jsonschema-generator-gradle-plugin")
             }
         }
     }

@@ -12,7 +12,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "gradle-jsonschema-generator"
+rootProject.name = "jsonschema-generator-gradle-plugin-root"
 
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 
@@ -23,5 +23,5 @@ plugins {
 
 include(
     "jsonschema-generator-gradle-plugin",
-    "jsonschema-generator-module-provider",
+    "jsonschema-module-provider",
 )
