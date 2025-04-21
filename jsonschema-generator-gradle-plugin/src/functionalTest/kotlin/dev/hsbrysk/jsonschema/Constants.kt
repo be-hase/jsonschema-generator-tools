@@ -1,8 +1,3 @@
-/*
- * Copyright (c) 2025 LY Corporation. All rights reserved.
- * LY Corporation PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
- */
-
 package dev.hsbrysk.jsonschema
 
 const val KOTLIN_VERSION = "2.0.20"

@@ -3,6 +3,7 @@ package dev.hsbrysk.jsonschema.task
 import org.gradle.api.DefaultTask
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
 import software.amazon.awssdk.core.checksums.RequestChecksumCalculation
@@ -16,30 +17,38 @@ import java.net.URI
 
 abstract class UploadJsonSchemaToS3Task : DefaultTask() {
     @get:Input
+    @get:Optional
     abstract val accessKeyId: Property<String>
 
     @get:Input
+    @get:Optional
     abstract val secretAccessKey: Property<String>
 
     @get:Input
+    @get:Optional
     abstract val region: Property<Region>
 
     @get:Input
+    @get:Optional
     abstract val endpoint: Property<String>
 
     @get:Input
     abstract val bucket: Property<String>
 
     @get:Input
+    @get:Optional
     abstract val dir: Property<String>
 
     @get:Input
+    @get:Optional
     abstract val acl: Property<ObjectCannedACL>
 
     @get:Input
+    @get:Optional
     abstract val requestChecksumCalculation: Property<RequestChecksumCalculation>
 
     @get:Input
+    @get:Optional
     abstract val responseChecksumValidation: Property<ResponseChecksumValidation>
 
     @TaskAction

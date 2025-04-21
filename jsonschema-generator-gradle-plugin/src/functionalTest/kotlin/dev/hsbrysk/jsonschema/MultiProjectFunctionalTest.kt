@@ -9,36 +9,61 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import kotlin.io.path.Path
 
-class BasicFunctionalTest {
+class MultiProjectFunctionalTest {
     @field:TempDir
     lateinit var projectDir: File
 
-    private val buildFile by lazy { projectDir.resolve("build.gradle.kts") }
     private val settingsFile by lazy { projectDir.resolve("settings.gradle.kts") }
 
     @BeforeEach
     fun beforeEach() {
-        settingsFile.writeText(
-            // language=kotlin
-            """
-            dependencyResolutionManagement {
-                repositories {
-                    mavenCentral()
-                }
-            }
-            """.trimIndent(),
-        )
+        settingsFile.writeText("")
     }
 
     @Test
-    fun java() {
-        buildFile.writeText(
+    fun `multi projects - java`() {
+        settingsFile.appendText(
+            // language=kotlin
+            """
+            include("one")
+            include("two")
+            include("three")
+            """.trimIndent(),
+        )
+
+        projectDir.resolve(Path("one").toFile()).mkdirs()
+        projectDir.resolve(Path("two").toFile()).mkdirs()
+        projectDir.resolve(Path("three").toFile()).mkdirs()
+
+        projectDir.resolve(Path("one", "build.gradle.kts").toFile()).writeText(
+            // language=kotlin
+            """
+            plugins {
+                java
+            }
+            """.trimIndent(),
+        )
+        projectDir.resolve(Path("two", "build.gradle.kts").toFile()).writeText(
+            // language=kotlin
+            """
+            plugins {
+                java
+            }
+            dependencies {
+                implementation(project(":one"))
+            }
+            """.trimIndent(),
+        )
+        projectDir.resolve(Path("three", "build.gradle.kts").toFile()).writeText(
             // language=kotlin
             """
             import com.github.victools.jsonschema.generator.SchemaVersion
             plugins {
                 java
                 id("dev.hsbrysk.jsonschema-generator")
+            }
+            dependencies {
+                implementation(project(":two"))
             }
             jsonSchemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
@@ -51,8 +76,8 @@ class BasicFunctionalTest {
             """.trimIndent(),
         )
 
-        projectDir.resolve(Path("src", "main", "java", "com", "example").toFile()).mkdirs()
-        projectDir.resolve(Path("src", "main", "java", "com", "example", "Person.java").toFile()).writeText(
+        projectDir.resolve(Path("one", "src", "main", "java", "com", "example").toFile()).mkdirs()
+        projectDir.resolve(Path("one", "src", "main", "java", "com", "example", "Person.java").toFile()).writeText(
             // language=java
             """
             package com.example;
@@ -65,8 +90,9 @@ class BasicFunctionalTest {
             .withProjectDir(projectDir)
             .withArguments("generateJsonSchema")
             .build()
-
-        assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
+        assertThat(
+            projectDir.resolve(Path("three", "build", "json-schemas", "Person.json").toFile()).readText(),
+        )
             .isEqualTo(
                 // language=json
                 """
@@ -90,14 +116,49 @@ class BasicFunctionalTest {
     }
 
     @Test
-    fun kotlin() {
-        buildFile.writeText(
+    fun `multi projects - java-library`() {
+        settingsFile.appendText(
+            // language=kotlin
+            """
+            include("one")
+            include("two")
+            include("three")
+            """.trimIndent(),
+        )
+
+        projectDir.resolve(Path("one").toFile()).mkdirs()
+        projectDir.resolve(Path("two").toFile()).mkdirs()
+        projectDir.resolve(Path("three").toFile()).mkdirs()
+
+        projectDir.resolve(Path("one", "build.gradle.kts").toFile()).writeText(
+            // language=kotlin
+            """
+            plugins {
+                `java-library`
+            }
+            """.trimIndent(),
+        )
+        projectDir.resolve(Path("two", "build.gradle.kts").toFile()).writeText(
+            // language=kotlin
+            """
+            plugins {
+                `java-library`
+            }
+            dependencies {
+                implementation(project(":one"))
+            }
+            """.trimIndent(),
+        )
+        projectDir.resolve(Path("three", "build.gradle.kts").toFile()).writeText(
             // language=kotlin
             """
             import com.github.victools.jsonschema.generator.SchemaVersion
             plugins {
-                kotlin("jvm") version "$KOTLIN_VERSION"
+                `java-library`
                 id("dev.hsbrysk.jsonschema-generator")
+            }
+            dependencies {
+                implementation(project(":two"))
             }
             jsonSchemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
@@ -110,12 +171,12 @@ class BasicFunctionalTest {
             """.trimIndent(),
         )
 
-        projectDir.resolve(Path("src", "main", "kotlin", "com", "example").toFile()).mkdirs()
-        projectDir.resolve(Path("src", "main", "kotlin", "com", "example", "Person.kt").toFile()).writeText(
-            // language=kotlin
+        projectDir.resolve(Path("one", "src", "main", "java", "com", "example").toFile()).mkdirs()
+        projectDir.resolve(Path("one", "src", "main", "java", "com", "example", "Person.java").toFile()).writeText(
+            // language=java
             """
-            package com.example
-            data class Person(val name: String, val age: Int, val gender: String)
+            package com.example;
+            public record Person(String name, int age, String gender) {}
             """.trimIndent(),
         )
 
@@ -124,8 +185,9 @@ class BasicFunctionalTest {
             .withProjectDir(projectDir)
             .withArguments("generateJsonSchema")
             .build()
-
-        assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
+        assertThat(
+            projectDir.resolve(Path("three", "build", "json-schemas", "Person.json").toFile()).readText(),
+        )
             .isEqualTo(
                 // language=json
                 """

@@ -21,4 +21,7 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.10.0"
 }
 
-include("jsonschema-generator-gradle-plugin")
+include(
+    "jsonschema-generator-gradle-plugin",
+    "jsonschema-generator-module-provider",
+)

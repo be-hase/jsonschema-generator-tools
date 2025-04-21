@@ -1,8 +1,6 @@
 package dev.hsbrysk.jsonschema
 
 import com.github.victools.jsonschema.generator.OptionPreset
-import com.github.victools.jsonschema.module.jackson.JacksonOption
-import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationOption
 import dev.hsbrysk.jsonschema.task.GenerateJsonSchemaTask
 import dev.hsbrysk.jsonschema.task.UploadJsonSchemaToS3Task
 import org.gradle.api.Plugin
@@ -24,9 +22,9 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
         }
         modulesExtension = extension.extensions.create("modules", ModulesExtension::class.java).apply {
             jacksonEnabled.convention(false)
-            jacksonOptions.convention(emptySet<JacksonOption>())
+            jacksonOptions.convention(emptySet())
             jakartaValidationEnabled.convention(false)
-            jakartaValidationOptions.convention(emptySet<JakartaValidationOption>())
+            jakartaValidationOptions.convention(emptySet())
             swagger2Enabled.convention(false)
         }
         s3Extension = extension.extensions.create("s3", S3Extension::class.java)
@@ -52,7 +50,6 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
             task.jakartaValidationEnabled.set(modulesExtension.jakartaValidationEnabled)
             task.jakartaValidationOptions.set(modulesExtension.jakartaValidationOptions)
             task.swagger2Enabled.set(modulesExtension.swagger2Enabled)
-            task.pluginClasspath.setFrom(project.configurations.named(CONFIGURATION_JSONSCHEMA_GENERATOR))
             task.schemas.set(project.provider { extension.schemas.associate { it.name to it.target.get() } })
 
             task.dependsOn("classes")
@@ -77,6 +74,6 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
     }
 
     companion object {
-        const val CONFIGURATION_JSONSCHEMA_GENERATOR = "jsonschemaGenerator"
+        internal const val CONFIGURATION_JSONSCHEMA_GENERATOR = "jsonschemaGenerator"
     }
 }

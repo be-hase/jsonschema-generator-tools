@@ -9,7 +9,7 @@ import org.junit.jupiter.api.io.TempDir
 import java.io.File
 import kotlin.io.path.Path
 
-class BasicFunctionalTest {
+class JakartaValidationFunctionalTest {
     @field:TempDir
     lateinit var projectDir: File
 
@@ -40,8 +40,14 @@ class BasicFunctionalTest {
                 java
                 id("dev.hsbrysk.jsonschema-generator")
             }
+            dependencies {
+                implementation("jakarta.validation:jakarta.validation-api:$JAKARTA_VALIDATION_VERSION")
+            }
             jsonSchemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
+                modules {
+                    jakartaValidationEnabled = true
+                }
                 schemas {
                     create("Person") {
                         target = "com.example.Person"
@@ -56,7 +62,14 @@ class BasicFunctionalTest {
             // language=java
             """
             package com.example;
-            public record Person(String name, int age, String gender) {}
+            import jakarta.validation.constraints.Max;
+            import jakarta.validation.constraints.Min;
+            import jakarta.validation.constraints.NotBlank;
+            public record Person(
+                    @NotBlank String name,
+                    @Min(0) @Max(200) int age
+            ) {
+            }
             """.trimIndent(),
         )
 
@@ -75,13 +88,13 @@ class BasicFunctionalTest {
                   "type" : "object",
                   "properties" : {
                     "age" : {
-                      "type" : "integer"
-                    },
-                    "gender" : {
-                      "type" : "string"
+                      "type" : "integer",
+                      "minimum" : 0,
+                      "maximum" : 200
                     },
                     "name" : {
-                      "type" : "string"
+                      "type" : "string",
+                      "minLength" : 1
                     }
                   }
                 }
@@ -99,8 +112,14 @@ class BasicFunctionalTest {
                 kotlin("jvm") version "$KOTLIN_VERSION"
                 id("dev.hsbrysk.jsonschema-generator")
             }
+            dependencies {
+                implementation("jakarta.validation:jakarta.validation-api:$JAKARTA_VALIDATION_VERSION")
+            }
             jsonSchemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
+                modules {
+                    jakartaValidationEnabled = true
+                }
                 schemas {
                     create("Person") {
                         target = "com.example.Person"
@@ -115,7 +134,17 @@ class BasicFunctionalTest {
             // language=kotlin
             """
             package com.example
-            data class Person(val name: String, val age: Int, val gender: String)
+            import jakarta.validation.constraints.Max
+            import jakarta.validation.constraints.Min
+            import jakarta.validation.constraints.NotBlank
+            data class Person(
+                @field:NotBlank
+                val name: String,
+
+                @field:Min(0)
+                @field:Max(200)
+                val age: Int,
+            )
             """.trimIndent(),
         )
 
@@ -134,13 +163,13 @@ class BasicFunctionalTest {
                   "type" : "object",
                   "properties" : {
                     "age" : {
-                      "type" : "integer"
-                    },
-                    "gender" : {
-                      "type" : "string"
+                      "type" : "integer",
+                      "minimum" : 0,
+                      "maximum" : 200
                     },
                     "name" : {
-                      "type" : "string"
+                      "type" : "string",
+                      "minLength" : 1
                     }
                   }
                 }

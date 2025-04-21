@@ -10,14 +10,16 @@ import com.github.victools.jsonschema.module.jackson.JacksonOption
 import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationModule
 import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationOption
 import com.github.victools.jsonschema.module.swagger2.Swagger2Module
+import dev.hsbrysk.jsonschema.JsonSchemaGeneratorPlugin.Companion.CONFIGURATION_JSONSCHEMA_GENERATOR
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import java.io.File
 import java.net.URLClassLoader
@@ -31,40 +33,62 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
     abstract val schemaVersion: Property<SchemaVersion>
 
     @get:Input
+    @get:Optional
     abstract val optionPreset: Property<OptionPreset>
 
     @get:Input
+    @get:Optional
     abstract val withOptions: SetProperty<Option>
 
     @get:Input
+    @get:Optional
     abstract val withoutOptions: SetProperty<Option>
 
     @get:Input
+    @get:Optional
     abstract val jacksonEnabled: Property<Boolean>
 
     @get:Input
+    @get:Optional
     abstract val jacksonOptions: SetProperty<JacksonOption>
 
     @get:Input
+    @get:Optional
     abstract val jakartaValidationEnabled: Property<Boolean>
 
     @get:Input
+    @get:Optional
     abstract val jakartaValidationOptions: SetProperty<JakartaValidationOption>
 
     @get:Input
+    @get:Optional
     abstract val swagger2Enabled: Property<Boolean>
-
-    @get:Classpath
-    abstract val pluginClasspath: ConfigurableFileCollection
 
     @get:Input
     abstract val schemas: MapProperty<String, String>
 
+    @get:Classpath
+    val compileClasspath: FileCollection
+
+    @get:Classpath
+    val runtimeClasspath: FileCollection
+
+    @get:Classpath
+    val pluginClasspath: FileCollection
+
+    init {
+        val javaExtension = project.extensions.getByType(JavaPluginExtension::class.java)
+        val mainSourceSet = javaExtension.sourceSets.getByName("main")
+        compileClasspath = mainSourceSet.compileClasspath
+        runtimeClasspath = mainSourceSet.runtimeClasspath
+        pluginClasspath = project.configurations.getByName(CONFIGURATION_JSONSCHEMA_GENERATOR)
+    }
+
     @TaskAction
     fun generateJsonSchema() {
-        (mainDependencies() + pluginClasspath).forEach {
-            println("Generating $it")
-        }
+//        (mainDependencies() + pluginClasspath).forEach {
+//            println("Generating $it")
+//        }
         val classLoader = buildClassLoader(mainDependencies() + pluginClasspath)
         val generator = buildSchemaGenerator()
 
@@ -104,22 +128,18 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
             .build(),
     )
 
-    private fun mainDependencies(): List<File> {
-        val javaExtension = project.extensions.getByType(JavaPluginExtension::class.java)
-        val mainSourceSet = javaExtension.sourceSets.getByName("main")
-        return buildList<File> {
-            (mainSourceSet.compileClasspath + mainSourceSet.runtimeClasspath).forEach { file ->
-                val path = file.toPath().normalize()
+    private fun mainDependencies(): List<File> = buildList<File> {
+        (compileClasspath + runtimeClasspath).forEach { file ->
+            val path = file.toPath().normalize()
 
-                // When using the java-library plugin, the `jar` task of the dependency is not executed, so the jar file is not created.
-                // To handle such cases, instead of referencing the jar,
-                // replace it with references to "**/build/classes/*/main" and "**/build/resources/main".
-                // Let me know if there's a better way to handle this.
-                if (isBuiltJar(path)) {
-                    addAll(findClassesAndResourcesFromBuildJar(path))
-                } else {
-                    add(file)
-                }
+            // When using the java-library plugin, the `jar` task of the dependency is not executed, so the jar file is not created.
+            // To handle such cases, instead of referencing the jar,
+            // replace it with references to "**/build/classes/*/main" and "**/build/resources/main".
+            // Let me know if there's a better way to handle this.
+            if (isBuiltJar(path)) {
+                addAll(findClassesAndResourcesFromBuildJar(path))
+            } else {
+                add(file)
             }
         }
     }
