@@ -49,23 +49,7 @@ class OptionPresetFunctionalTest {
             // language=java
             """
             package com.example;
-            public class Person {
-                private final String name;
-                private final int age;
-
-                public Person(String name, int age) {
-                    this.name = name;
-                    this.age = age;
-                }
-
-                public String getName() {
-                    return name;
-                }
-
-                public int getAge() {
-                    return age;
-                }
-            }
+            public record Person(String name, int age) {}
             """.trimIndent(),
         )
 
@@ -88,10 +72,19 @@ class OptionPresetFunctionalTest {
                     "name" : {
                       "type" : [ "string", "null" ]
                     },
-                    "getAge()" : {
+                    "age()" : {
                       "type" : "integer"
                     },
-                    "getName()" : {
+                    "equals(Object)" : {
+                      "type" : "boolean"
+                    },
+                    "hashCode()" : {
+                      "type" : "integer"
+                    },
+                    "name()" : {
+                      "type" : [ "string", "null" ]
+                    },
+                    "toString()" : {
                       "type" : [ "string", "null" ]
                     }
                   }

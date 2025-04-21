@@ -65,26 +65,10 @@ class JakartaValidationFunctionalTest {
             import jakarta.validation.constraints.Max;
             import jakarta.validation.constraints.Min;
             import jakarta.validation.constraints.NotBlank;
-            public class Person {
-                @NotBlank
-                private final String name;
-
-                @Min(0)
-                @Max(200)
-                private final int age;
-
-                public Person(String name, int age) {
-                    this.name = name;
-                    this.age = age;
-                }
-
-                public String getName() {
-                    return name;
-                }
-
-                public int getAge() {
-                    return age;
-                }
+            public record Person(
+                    @NotBlank String name,
+                    @Min(0) @Max(200) int age
+            ) {
             }
             """.trimIndent(),
         )
