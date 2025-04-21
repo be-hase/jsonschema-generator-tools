@@ -27,6 +27,6 @@ gradlePlugin {
         implementationClass = "dev.hsbrysk.jsonschema.JsonSchemaGeneratorPlugin"
     }
 
-    website = "https://github.com/be-hase/jsonschema-generator-gradle-plugin"
-    vcsUrl = "https://github.com/be-hase/jsonschema-generator-gradle-plugin"
+    website = "https://github.com/be-hase/jsonschema-generator-tools"
+    vcsUrl = "https://github.com/be-hase/jsonschema-generator-tools"
 }
