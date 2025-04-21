@@ -15,6 +15,7 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
     override fun apply(project: Project) {
         extension = project.extensions.create("jsonSchemaGenerator", JsonSchemaGeneratorExtension::class.java).apply {
             optionPreset.convention(OptionPreset.PLAIN_JSON)
+            customConfigs.convention(emptyMap())
         }
         optionsExtension = extension.extensions.create("options", OptionsExtension::class.java).apply {
             with.convention(emptySet())
@@ -51,6 +52,7 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
             task.jakartaValidationOptions.set(modulesExtension.jakartaValidationOptions)
             task.swagger2Enabled.set(modulesExtension.swagger2Enabled)
             task.schemas.set(project.provider { extension.schemas.associate { it.name to it.target.get() } })
+            task.customConfigs.set(extension.customConfigs)
 
             task.dependsOn("classes")
         }

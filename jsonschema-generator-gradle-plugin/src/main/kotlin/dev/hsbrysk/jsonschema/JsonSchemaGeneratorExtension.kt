@@ -10,6 +10,7 @@ import org.gradle.api.Named
 import org.gradle.api.NamedDomainObjectContainer
 import org.gradle.api.Project
 import org.gradle.api.plugins.ExtensionAware
+import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
 import org.gradle.api.provider.SetProperty
 import software.amazon.awssdk.core.checksums.RequestChecksumCalculation
@@ -35,6 +36,8 @@ abstract class JsonSchemaGeneratorExtension @Inject constructor(project: Project
     }
 
     val s3: S3Extension = project.objects.newInstance(S3Extension::class.java)
+
+    abstract val customConfigs: MapProperty<String, String>
 }
 
 interface SchemaExtension : Named {

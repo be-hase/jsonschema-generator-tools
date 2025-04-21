@@ -69,6 +69,10 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
     @get:Input
     abstract val schemas: MapProperty<String, String>
 
+    @get:Input
+    @get:Optional
+    abstract val customConfigs: MapProperty<String, String>
+
     @get:Classpath
     val compileClasspath: FileCollection
 
@@ -124,9 +128,8 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
                     without(it)
                 }
 
-                val properties = project.providers.gradlePropertiesPrefixedBy("jsonschema.generator.").get()
                 ServiceLoader.load(ModuleProvider::class.java, classLoader).forEach { provider ->
-                    with(provider.provide(properties))
+                    with(provider.provide(customConfigs.get()))
                 }
             }
             .build(),

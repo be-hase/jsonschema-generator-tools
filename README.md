@@ -1,6 +1,6 @@
-# jsonschema-generator-gradle-plugin
+# jsonschema-generator-tools
 
-Gradle Plugin for [victools/jsonschema-generator](https://github.com/victools/jsonschema-generator).
+Gradle plugin and others for [victools/jsonschema-generator](https://github.com/victools/jsonschema-generator).
 
 By using this Gradle plugin, you can generate a JSON Schema from a Java class.
 
@@ -137,6 +137,10 @@ jsonSchemaGenerator {
         requestChecksumCalculation = RequestChecksumCalculation.blahblah
         responseChecksumValidation = ResponseChecksumValidation.blahblah
     }
+
+    // If you are developing a ModuleProvider using `dev.hsbrysk.jsonschema:jsonschema-module-provider`,
+    // use this as needed.
+    customConfigs = mapOf(...)
 }
 ```
 
@@ -184,10 +188,10 @@ package com.example;
 // ...
 
 public class SecretStringModuleProvider implements ModuleProvider {
-    // Gradle properties matching `jsonschema.generator.*` will be passed in.
+    // An arbitrary map that can be passed in the Gradle DSL.
     // By using these, you can generate a module with configurable settings.
     @Override
-    public Module provide(Map<String, String> properties) {
+    public Module provide(Map<String, String> customConfigs) {
         return new SecretStringModule();
     }
 }

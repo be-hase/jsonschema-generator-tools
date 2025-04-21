@@ -60,6 +60,7 @@ class ServiceLoaderFunctionalTest {
                         target = "com.example.Person"
                     }
                 }
+                customConfigs = mapOf("hoge-key" to "hoge-value")
             }
             """.trimIndent(),
         )
@@ -90,7 +91,7 @@ class ServiceLoaderFunctionalTest {
             }
 
             class SecretStringModuleProvider : ModuleProvider {
-                override fun provide(properties: Map<String, String?>): Module = SecretStringModule()
+                override fun provide(customConfigs: Map<String, String>): Module = SecretStringModule()
             }
 
             data class Person(val loginId: String, val password: SecretString)
