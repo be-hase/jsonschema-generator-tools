@@ -25,3 +25,8 @@ include(
     "jsonschema-generator-gradle-plugin",
     "jsonschema-module-provider",
 )
+
+include(
+    "test:test-type",
+    "test:test-type-module-provider",
+)

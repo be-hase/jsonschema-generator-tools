@@ -11,6 +11,7 @@ import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidatio
 import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationOption
 import com.github.victools.jsonschema.module.swagger2.Swagger2Module
 import dev.hsbrysk.jsonschema.JsonSchemaGeneratorPlugin.Companion.CONFIGURATION_JSONSCHEMA_GENERATOR
+import dev.hsbrysk.jsonschema.ModuleProvider
 import org.gradle.api.DefaultTask
 import org.gradle.api.file.FileCollection
 import org.gradle.api.plugins.JavaPluginExtension
@@ -26,6 +27,7 @@ import java.net.URLClassLoader
 import java.nio.file.FileSystems
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.ServiceLoader
 import kotlin.io.path.isDirectory
 
 abstract class GenerateJsonSchemaTask : DefaultTask() {
@@ -86,11 +88,8 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
 
     @TaskAction
     fun generateJsonSchema() {
-//        (mainDependencies() + pluginClasspath).forEach {
-//            println("Generating $it")
-//        }
         val classLoader = buildClassLoader(mainDependencies() + pluginClasspath)
-        val generator = buildSchemaGenerator()
+        val generator = buildSchemaGenerator(classLoader)
 
         project.layout.buildDirectory.get().file("json-schemas").asFile.mkdirs()
         schemas.get().forEach { name, target ->
@@ -103,7 +102,7 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
         }
     }
 
-    private fun buildSchemaGenerator() = SchemaGenerator(
+    private fun buildSchemaGenerator(classLoader: ClassLoader) = SchemaGenerator(
         SchemaGeneratorConfigBuilder(
             schemaVersion.get(),
             optionPreset.get(),
@@ -123,6 +122,11 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
                 }
                 withoutOptions.get().forEach {
                     without(it)
+                }
+
+                val properties = project.providers.gradlePropertiesPrefixedBy("jsonschema.generator.").get()
+                ServiceLoader.load(ModuleProvider::class.java, classLoader).forEach { provider ->
+                    with(provider.provide(properties))
                 }
             }
             .build(),

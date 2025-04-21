@@ -3,5 +3,5 @@ plugins {
 }
 
 dependencies {
-    implementation(libs.jsonschema.generator.core)
+    api(libs.jsonschema.generator.core)
 }

@@ -5,13 +5,14 @@ import com.vanniktech.maven.publish.JavadocJar
 
 plugins {
     id("conventions.java")
-    id("conventions.maven-publish")
     id("conventions.test")
     id("conventions.versioning")
+    id("conventions.maven-publish")
+    `java-library`
 }
 
 mavenPublishing {
     configure(
-        JavaLibrary(JavadocJar.Javadoc(), sourcesJar = true),
+        JavaLibrary(javadocJar = JavadocJar.Javadoc(), sourcesJar = true),
     )
 }

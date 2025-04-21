@@ -1,12 +1,12 @@
 package conventions.presets
 
 plugins {
-    id("conventions.detekt")
-    id("conventions.functional-test")
     id("conventions.java")
     id("conventions.kotlin")
-    id("conventions.ktlint")
     id("conventions.test")
+    id("conventions.functional-test")
+    id("conventions.detekt")
+    id("conventions.ktlint")
     id("conventions.versioning")
     `java-gradle-plugin`
     signing
