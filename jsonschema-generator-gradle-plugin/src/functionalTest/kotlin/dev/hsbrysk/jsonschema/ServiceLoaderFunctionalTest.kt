@@ -41,7 +41,106 @@ class ServiceLoaderFunctionalTest {
     }
 
     @Test
-    fun test() {
+    fun basic() {
+        buildFile.writeText(
+            // language=kotlin
+            """
+            import com.github.victools.jsonschema.generator.SchemaVersion
+            plugins {
+                kotlin("jvm") version "$KOTLIN_VERSION"
+                id("dev.hsbrysk.jsonschema-generator")
+            }
+            dependencies {
+                implementation("dev.hsbrysk.jsonschema:jsonschema-module-provider:latest-SNAPSHOT")
+            }
+            jsonSchemaGenerator {
+                schemaVersion = SchemaVersion.DRAFT_2020_12
+                schemas {
+                    create("Person") {
+                        target = "com.example.Person"
+                    }
+                }
+            }
+            """.trimIndent(),
+        )
+
+        projectDir.resolve(Path("src", "main", "kotlin", "com", "example").toFile()).mkdirs()
+        projectDir.resolve(Path("src", "main", "kotlin", "com", "example", "Person.kt").toFile()).writeText(
+            // language=kotlin
+            """
+            package com.example
+
+            import com.example.SecretString
+            import com.github.victools.jsonschema.generator.Module
+            import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder
+            import dev.hsbrysk.jsonschema.ModuleProvider
+
+            data class SecretString(val string: String)
+
+            class SecretStringModule : Module {
+                override fun applyToConfigBuilder(builder: SchemaGeneratorConfigBuilder) {
+                    builder.forFields().withTargetTypeOverridesResolver { field ->
+                        if (SecretString::class.java.isAssignableFrom(field.rawMember.type)) {
+                            listOf(field.context.resolve(String::class.java))
+                        } else {
+                            null
+                        }
+                    }
+                }
+            }
+
+            class SecretStringModuleProvider : ModuleProvider {
+                override fun provide(properties: Map<String, String?>): Module = SecretStringModule()
+            }
+
+            data class Person(val loginId: String, val password: SecretString)
+            """.trimIndent(),
+        )
+        projectDir.resolve(Path("src", "main", "resources", "META-INF", "services").toFile()).mkdirs()
+        projectDir.resolve(
+            Path(
+                "src",
+                "main",
+                "resources",
+                "META-INF",
+                "services",
+                "dev.hsbrysk.jsonschema.ModuleProvider",
+            ).toFile(),
+        ).writeText(
+            """
+            com.example.SecretStringModuleProvider
+            """.trimIndent(),
+        )
+
+        GradleRunner.create()
+            .forwardOutput()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withArguments("generateJsonSchema")
+            .build()
+
+        assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
+            .isEqualTo(
+                // language=json
+                """
+                {
+                  "${'$'}schema" : "https://json-schema.org/draft/2020-12/schema",
+                  "type" : "object",
+                  "properties" : {
+                    "loginId" : {
+                      "type" : "string"
+                    },
+                    "password" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+                """.trimIndent(),
+            )
+    }
+
+    @Test
+    fun `external dependency`() {
         buildFile.writeText(
             // language=kotlin
             """
