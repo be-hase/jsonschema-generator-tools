@@ -65,7 +65,7 @@ class MultiProjectFunctionalTest {
             dependencies {
                 implementation(project(":two"))
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 schemas {
                     create("Person") {
@@ -160,7 +160,7 @@ class MultiProjectFunctionalTest {
             dependencies {
                 implementation(project(":two"))
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 schemas {
                     create("Person") {

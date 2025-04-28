@@ -13,7 +13,7 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
     private lateinit var s3Extension: S3Extension
 
     override fun apply(project: Project) {
-        extension = project.extensions.create("jsonSchemaGenerator", JsonSchemaGeneratorExtension::class.java).apply {
+        extension = project.extensions.create("jsonschemaGenerator", JsonSchemaGeneratorExtension::class.java).apply {
             optionPreset.convention(OptionPreset.PLAIN_JSON)
             typeMappings.convention(emptyMap())
             customConfigs.convention(emptyMap())

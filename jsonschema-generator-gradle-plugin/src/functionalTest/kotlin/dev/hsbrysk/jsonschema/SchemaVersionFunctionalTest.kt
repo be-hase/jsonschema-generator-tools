@@ -31,7 +31,7 @@ class SchemaVersionFunctionalTest {
                 java
                 id("dev.hsbrysk.jsonschema-generator")
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_7
                 schemas {
                     create("Person") {

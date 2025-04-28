@@ -31,7 +31,7 @@ class TypeMappingFunctionalTest {
                 java
                 id("dev.hsbrysk.jsonschema-generator")
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 typeMappings = mapOf(
                     "java.time.Duration" to "java.lang.Integer",

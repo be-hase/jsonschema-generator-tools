@@ -32,7 +32,7 @@ class OptionPresetFunctionalTest {
                 java
                 id("dev.hsbrysk.jsonschema-generator")
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 optionPreset = OptionPreset.FULL_DOCUMENTATION
                 schemas {

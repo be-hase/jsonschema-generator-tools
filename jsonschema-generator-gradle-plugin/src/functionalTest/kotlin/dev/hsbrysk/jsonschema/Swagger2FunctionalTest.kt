@@ -43,7 +43,7 @@ class Swagger2FunctionalTest {
             dependencies {
                 implementation("io.swagger.core.v3:swagger-annotations:$SWAGGER2_VERSION")
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 modules {
                     swagger2Enabled = true

@@ -32,7 +32,7 @@ class OptionsFunctionalTest {
                 java
                 id("dev.hsbrysk.jsonschema-generator")
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 options {
                     with = setOf(Option.FLATTENED_ENUMS_FROM_TOSTRING)

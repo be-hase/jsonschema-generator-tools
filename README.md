@@ -24,7 +24,7 @@ plugins {
     id("dev.hsbrysk.jsonschema-generator")
 }
 
-jsonSchemaGenerator {
+jsonschemaGenerator {
     schemaVersion = SchemaVersion.DRAFT_2020_12
     schemas {
         create("Person") {
@@ -58,7 +58,7 @@ the following JSON Schema will be generated at `build/json-schemas/Person.json`.
 ## Configuration
 
 ```kotlin
-jsonSchemaGenerator {
+jsonschemaGenerator {
     // [Required]
     // Designated JSON Schema version.
     // See https://github.com/victools/jsonschema-generator/blob/3d8c8ff1af451b6465be76a562956f5ec30ed2c4/jsonschema-generator/src/main/java/com/github/victools/jsonschema/generator/SchemaVersion.java
@@ -223,7 +223,7 @@ plugins {
 dependencies {
     jsonschemaGenerator(project("YOUR_PROJECT"))
 }
-jsonSchemaGenerator {
+jsonschemaGenerator {
     // ...
 }
 ```
