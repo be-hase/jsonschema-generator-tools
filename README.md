@@ -104,6 +104,13 @@ jsonSchemaGenerator {
         swagger2Enabled = false
     }
 
+    // Use this when you want to treat a specific type as a different type.
+    // It is useful when you are using something like a value object.
+    // Default: empty
+    typeMappings = mapOf(
+        "com.example.SecretString" to "java.lang.Integer",
+    )
+
     schemas {
         // The specified string will be used to generate the schema at `build/json-schemas/{...}.json`.
         create("Hoge") {
