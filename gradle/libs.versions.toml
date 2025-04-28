@@ -5,13 +5,14 @@ ktlint = "1.5.0"
 
 [libraries]
 assertk = { module = "com.willowtreeapps.assertk:assertk-jvm", version = "0.28.1" }
-aws-sdk-s3 = {module="software.amazon.awssdk:s3", version="2.31.30"}
+aws-sdk-s3 = { module = "software.amazon.awssdk:s3", version = "2.31.30" }
 jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api", version = "3.1.1" }
 jsonschema-generator-core = { module = "com.github.victools:jsonschema-generator", version.ref = "jsonschema-generator" }
 jsonschema-generator-jackson = { module = "com.github.victools:jsonschema-module-jackson", version.ref = "jsonschema-generator" }
 jsonschema-generator-jakarta-validation = { module = "com.github.victools:jsonschema-module-jakarta-validation", version.ref = "jsonschema-generator" }
 jsonschema-generator-swagger2 = { module = "com.github.victools:jsonschema-module-swagger-2", version.ref = "jsonschema-generator" }
 junit-bom = { module = "org.junit:junit-bom", version = "5.12.2" }
+kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin-core" }
 swagger-annotations = { module = "io.swagger.core.v3:swagger-annotations", version = "2.2.30" }
 
 # gradle plugins for build-logic
@@ -23,4 +24,4 @@ gradle-plugin-maven-publish = { module = "com.vanniktech:gradle-maven-publish-pl
 gradle-plugin-plugin-publish = { module = "com.gradle.plugin-publish:com.gradle.plugin-publish.gradle.plugin", version = "1.3.1" }
 
 [plugins]
-plugin-publish = {id="com.gradle.plugin-publish", version="1.3.1"}
+plugin-publish = { id = "com.gradle.plugin-publish", version = "1.3.1" }

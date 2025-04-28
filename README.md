@@ -227,3 +227,7 @@ jsonSchemaGenerator {
     // ...
 }
 ```
+
+## Modules
+
+- [jsonschema-module-kotlin](./jsonschema-module-kotlin/README.md)
