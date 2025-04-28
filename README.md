@@ -1,5 +1,7 @@
 # jsonschema-generator-tools
 
+![Gradle Plugin Portal Version](https://img.shields.io/gradle-plugin-portal/v/dev.hsbrysk.jsonschema-generator)
+
 Gradle plugin and others for [victools/jsonschema-generator](https://github.com/victools/jsonschema-generator).
 
 By using this Gradle plugin, you can generate a JSON Schema from a Java class.
@@ -21,7 +23,7 @@ import com.github.victools.jsonschema.generator.SchemaVersion
 
 plugins {
     // ...
-    id("dev.hsbrysk.jsonschema-generator")
+    id("dev.hsbrysk.jsonschema-generator") version "{version}"
 }
 
 jsonSchemaGenerator {
@@ -218,7 +220,7 @@ configuration instead.
 ```kotlin
 plugins {
     // ...
-    id("dev.hsbrysk.jsonschema-generator")
+    id("dev.hsbrysk.jsonschema-generator") version "{version}"
 }
 dependencies {
     jsonschemaGenerator(project("YOUR_PROJECT"))
