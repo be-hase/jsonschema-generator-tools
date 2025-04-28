@@ -23,6 +23,7 @@ plugins {
 
 include(
     "jsonschema-generator-gradle-plugin",
+    "jsonschema-module-kotlin",
     "jsonschema-module-provider",
 )
 
