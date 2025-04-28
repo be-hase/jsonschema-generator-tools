@@ -43,7 +43,7 @@ class JacksonFunctionalTest {
             dependencies {
                 implementation("com.fasterxml.jackson.core:jackson-databind:$JACKSON_VERSION")
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 modules {
                     jacksonEnabled = true
@@ -192,7 +192,7 @@ class JacksonFunctionalTest {
             dependencies {
                 implementation("com.fasterxml.jackson.core:jackson-databind:$JACKSON_VERSION")
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 modules {
                     jacksonEnabled = true

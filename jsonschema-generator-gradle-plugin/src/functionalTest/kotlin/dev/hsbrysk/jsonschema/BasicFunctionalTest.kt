@@ -40,7 +40,7 @@ class BasicFunctionalTest {
                 java
                 id("dev.hsbrysk.jsonschema-generator")
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 schemas {
                     create("Person") {
@@ -99,7 +99,7 @@ class BasicFunctionalTest {
                 kotlin("jvm") version "$KOTLIN_VERSION"
                 id("dev.hsbrysk.jsonschema-generator")
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 schemas {
                     create("Person") {

@@ -53,7 +53,7 @@ class ServiceLoaderFunctionalTest {
             dependencies {
                 implementation("dev.hsbrysk.jsonschema:jsonschema-module-provider:latest-SNAPSHOT")
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 schemas {
                     create("Person") {
@@ -146,7 +146,7 @@ class ServiceLoaderFunctionalTest {
                 implementation("dev.hsbrysk.jsonschema.test:test-type:latest-SNAPSHOT")
                 jsonschemaGenerator("dev.hsbrysk.jsonschema.test:test-type-module-provider:latest-SNAPSHOT")
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 schemas {
                     create("Person") {

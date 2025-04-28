@@ -47,7 +47,7 @@ class KotlinModuleFunctionalTest {
             dependencies {
                 jsonschemaGenerator("dev.hsbrysk.jsonschema:jsonschema-module-kotlin:latest-SNAPSHOT")
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 customConfigs = mapOf(
                     "kotlin.options" to "USE_NULLABLE, USE_REQUIRED_VIA_DEFAULT_ARGS"

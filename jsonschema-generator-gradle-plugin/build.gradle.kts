@@ -17,7 +17,7 @@ dependencies {
 }
 
 gradlePlugin {
-    val jsonSchemaGenerator by plugins.creating {
+    val jsonschemaGenerator by plugins.creating {
         id = "dev.hsbrysk.jsonschema-generator"
         displayName = "Gradle Plugin for victools/jsonschema-generator"
         description = """

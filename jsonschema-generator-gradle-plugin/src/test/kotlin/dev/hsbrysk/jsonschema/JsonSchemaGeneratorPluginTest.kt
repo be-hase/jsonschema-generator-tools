@@ -21,7 +21,7 @@ class JsonSchemaGeneratorPluginTest {
         assertThat(project.tasks.findByName("uploadJsonSchemaToS3")).isNotNull()
 
         // check default property
-        val extension = project.extensions.getByName("jsonSchemaGenerator") as JsonSchemaGeneratorExtension
+        val extension = project.extensions.getByName("jsonschemaGenerator") as JsonSchemaGeneratorExtension
         assertThat(extension.optionPreset.get()).isEqualTo(OptionPreset.PLAIN_JSON)
         assertThat(extension.customConfigs.get()).isEmpty()
         val optionsExtension = extension.extensions.getByName("options") as OptionsExtension

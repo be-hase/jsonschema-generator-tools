@@ -31,7 +31,7 @@ plugins {
 dependencies {
     jsonschemaGenerator("dev.hsbrysk.jsonschema:jsonschema-module-kotlin:latest-SNAPSHOT")
 }
-jsonSchemaGenerator {
+jsonschemaGenerator {
     // ...
     customConfigs = mapOf(
         "kotlin.options" to "USE_NULLABLE, USE_REQUIRED_VIA_DEFAULT_ARGS" // comma separated values

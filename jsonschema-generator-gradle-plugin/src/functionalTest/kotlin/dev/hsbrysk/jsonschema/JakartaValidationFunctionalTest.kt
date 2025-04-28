@@ -43,7 +43,7 @@ class JakartaValidationFunctionalTest {
             dependencies {
                 implementation("jakarta.validation:jakarta.validation-api:$JAKARTA_VALIDATION_VERSION")
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 modules {
                     jakartaValidationEnabled = true
@@ -115,7 +115,7 @@ class JakartaValidationFunctionalTest {
             dependencies {
                 implementation("jakarta.validation:jakarta.validation-api:$JAKARTA_VALIDATION_VERSION")
             }
-            jsonSchemaGenerator {
+            jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
                 modules {
                     jakartaValidationEnabled = true
