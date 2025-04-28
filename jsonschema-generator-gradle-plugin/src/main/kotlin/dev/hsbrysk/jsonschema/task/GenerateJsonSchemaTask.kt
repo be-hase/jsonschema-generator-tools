@@ -67,6 +67,9 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
     abstract val swagger2Enabled: Property<Boolean>
 
     @get:Input
+    abstract val typeMappings: MapProperty<String, String>
+
+    @get:Input
     abstract val schemas: MapProperty<String, String>
 
     @get:Input
@@ -126,6 +129,19 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
                 }
                 withoutOptions.get().forEach {
                     without(it)
+                }
+
+                val typeMappingsList = typeMappings.get()
+                    .map { classLoader.loadClass(it.key) to classLoader.loadClass(it.value) }
+                if (typeMappingsList.isNotEmpty()) {
+                    forFields()
+                        .withTargetTypeOverridesResolver { field ->
+                            val type = field.rawMember.type
+                            typeMappingsList.firstOrNull { (src, _) -> src.isAssignableFrom(type) }
+                                ?.let { (_, dist) ->
+                                    listOf(field.context.resolve(dist))
+                                }
+                        }
                 }
 
                 ServiceLoader.load(ModuleProvider::class.java, classLoader).forEach { provider ->
