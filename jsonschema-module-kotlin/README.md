@@ -6,10 +6,9 @@ Kotlin module for [victools/jsonschema-generator](https://github.com/victools/js
 
 ```kotlin
 val generator = SchemaGenerator(
-    SchemaGeneratorConfigBuilder(...
-)
-    .with(KotlinModule(KotlinOption.USE_NULLABLE))
-    .build()
+    SchemaGeneratorConfigBuilder(...)
+        .with(KotlinModule(KotlinOption.USE_NULLABLE))
+        .build()
 )
 ```
 
@@ -26,10 +25,10 @@ val generator = SchemaGenerator(
 ```kotlin
 plugins {
     // ...
-    id("dev.hsbrysk.jsonschema-generator")
+    id("dev.hsbrysk.jsonschema-generator") version "{version}"
 }
 dependencies {
-    jsonschemaGenerator("dev.hsbrysk.jsonschema:jsonschema-module-kotlin:latest-SNAPSHOT")
+    jsonschemaGenerator("dev.hsbrysk.jsonschema:jsonschema-module-kotlin:{version}")
 }
 jsonschemaGenerator {
     // ...
