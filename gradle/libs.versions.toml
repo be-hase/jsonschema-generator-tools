@@ -11,7 +11,7 @@ jsonschema-generator-core = { module = "com.github.victools:jsonschema-generator
 jsonschema-generator-jackson = { module = "com.github.victools:jsonschema-module-jackson", version.ref = "jsonschema-generator" }
 jsonschema-generator-jakarta-validation = { module = "com.github.victools:jsonschema-module-jakarta-validation", version.ref = "jsonschema-generator" }
 jsonschema-generator-swagger2 = { module = "com.github.victools:jsonschema-module-swagger-2", version.ref = "jsonschema-generator" }
-junit-bom = { module = "org.junit:junit-bom", version = "5.12.2" }
+junit-bom = { module = "org.junit:junit-bom", version = "5.13.0" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin-core" }
 swagger-annotations = { module = "io.swagger.core.v3:swagger-annotations", version = "2.2.30" }
 
