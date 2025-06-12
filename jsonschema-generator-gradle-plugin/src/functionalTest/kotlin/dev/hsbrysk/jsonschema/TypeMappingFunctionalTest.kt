@@ -51,7 +51,8 @@ class TypeMappingFunctionalTest {
             """
             package com.example;
             import java.time.Duration;
-            public record Options(Duration timeout) {}
+            import java.util.List;
+            public record Options(Duration timeout, List<Duration> timeoutList) {}
             """.trimIndent(),
         )
 
@@ -71,6 +72,12 @@ class TypeMappingFunctionalTest {
                   "properties" : {
                     "timeout" : {
                       "type" : "integer"
+                    },
+                    "timeoutList" : {
+                      "type" : "array",
+                      "items" : {
+                        "type" : "integer"
+                      }
                     }
                   }
                 }

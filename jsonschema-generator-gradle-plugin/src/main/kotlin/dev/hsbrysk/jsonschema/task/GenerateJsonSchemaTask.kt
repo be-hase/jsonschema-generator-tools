@@ -136,7 +136,7 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
                 if (typeMappingsList.isNotEmpty()) {
                     forFields()
                         .withTargetTypeOverridesResolver { field ->
-                            val type = field.rawMember.type
+                            val type = field.type.erasedType
                             typeMappingsList.firstOrNull { (src, _) -> src.isAssignableFrom(type) }
                                 ?.let { (_, dist) ->
                                     listOf(field.context.resolve(dist))
