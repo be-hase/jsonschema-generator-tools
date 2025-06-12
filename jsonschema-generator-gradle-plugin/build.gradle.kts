@@ -7,11 +7,11 @@ plugins {
 dependencies {
     implementation(projects.jsonschemaModuleProvider)
 
-    implementation(libs.aws.sdk.s3)
+    api(libs.aws.sdk.s3)
     implementation(libs.jakarta.validation.api)
-    implementation(libs.jsonschema.generator.core)
-    implementation(libs.jsonschema.generator.jackson)
-    implementation(libs.jsonschema.generator.jakarta.validation)
+    api(libs.jsonschema.generator.core)
+    api(libs.jsonschema.generator.jackson)
+    api(libs.jsonschema.generator.jakarta.validation)
     implementation(libs.jsonschema.generator.swagger2)
     implementation(libs.swagger.annotations)
 }
