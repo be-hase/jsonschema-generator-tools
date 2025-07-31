@@ -13,7 +13,7 @@ jsonschema-generator-jakarta-validation = { module = "com.github.victools:jsonsc
 jsonschema-generator-swagger2 = { module = "com.github.victools:jsonschema-module-swagger-2", version.ref = "jsonschema-generator" }
 junit-bom = { module = "org.junit:junit-bom", version = "5.13.4" }
 kotlin-reflect = { module = "org.jetbrains.kotlin:kotlin-reflect", version.ref = "kotlin-core" }
-swagger-annotations = { module = "io.swagger.core.v3:swagger-annotations", version = "2.2.34" }
+swagger-annotations = { module = "io.swagger.core.v3:swagger-annotations", version = "2.2.35" }
 
 # gradle plugins for build-logic
 gradle-plugin-detekt = { module = "io.gitlab.arturbosch.detekt:detekt-gradle-plugin", version = "1.23.8" }
