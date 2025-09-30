@@ -32,7 +32,6 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
         s3Extension = extension.extensions.create("s3", S3Extension::class.java)
 
         project.configurations.create(CONFIGURATION_JSONSCHEMA_GENERATOR) { configuration ->
-            configuration.isVisible = false
             configuration.isTransitive = true
             configuration.description = "The jsonschemaGenerator dependencies to be used for this project."
             configuration.isCanBeResolved = true
