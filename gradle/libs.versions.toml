@@ -5,7 +5,7 @@ ktlint = "1.5.0"
 
 [libraries]
 assertk = { module = "com.willowtreeapps.assertk:assertk-jvm", version = "0.28.1" }
-aws-sdk-s3 = { module = "software.amazon.awssdk:s3", version = "2.40.9" }
+aws-sdk-s3 = { module = "software.amazon.awssdk:s3", version = "2.40.10" }
 jakarta-validation-api = { module = "jakarta.validation:jakarta.validation-api", version = "3.1.1" }
 jsonschema-generator-core = { module = "com.github.victools:jsonschema-generator", version.ref = "jsonschema-generator" }
 jsonschema-generator-jackson = { module = "com.github.victools:jsonschema-module-jackson", version.ref = "jsonschema-generator" }
