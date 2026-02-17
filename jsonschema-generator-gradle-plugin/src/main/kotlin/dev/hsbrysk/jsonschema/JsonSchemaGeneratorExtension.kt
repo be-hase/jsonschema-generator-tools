@@ -31,7 +31,7 @@ abstract class JsonSchemaGeneratorExtension @Inject constructor(project: Project
 
     val typeMappings: MapProperty<String, String> = project.objects.mapProperty(String::class.java, String::class.java)
 
-    val schemas: NamedDomainObjectContainer<SchemaExtension> = project.container(SchemaExtension::class.java)
+    abstract val schemas: NamedDomainObjectContainer<SchemaExtension>
 
     fun schemas(action: Action<NamedDomainObjectContainer<SchemaExtension>>) {
         action.execute(schemas)
