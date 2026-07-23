@@ -1,5 +1,6 @@
 package dev.hsbrysk.jsonschema.task
 
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.victools.jsonschema.generator.Option
 import com.github.victools.jsonschema.generator.OptionPreset
 import com.github.victools.jsonschema.generator.SchemaGenerator
@@ -69,6 +70,14 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
     abstract val swagger2Enabled: Property<Boolean>
 
     @get:Input
+    @get:Optional
+    abstract val schemaPropertyEnabled: Property<Boolean>
+
+    @get:Input
+    @get:Optional
+    abstract val schemaPropertyRequired: Property<Boolean>
+
+    @get:Input
     abstract val typeMappings: MapProperty<String, String>
 
     @get:Input
@@ -103,11 +112,29 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
         project.layout.buildDirectory.get().file("json-schemas").asFile.mkdirs()
         schemas.get().forEach { name, target ->
             val clazz = classLoader.loadClass(target)
-            val result = generator.generateSchema(clazz).toPrettyString()
+            val schema = generator.generateSchema(clazz)
+            if (schemaPropertyEnabled.get()) {
+                injectSchemaProperty(schema)
+            }
 
             val outPath = project.layout.buildDirectory.get().file("json-schemas/$name.json").asFile
-            outPath.writeText(result)
+            outPath.writeText(schema.toPrettyString())
             println("Generated JSON schema: ${outPath.absolutePath}")
+        }
+    }
+
+    // Allows instance documents to declare which schema they conform to via the `$schema` key.
+    // See https://github.com/be-hase/jsonschema-generator-tools/issues/122
+    private fun injectSchemaProperty(schema: ObjectNode) {
+        val properties = schema.withObject("/properties")
+        if (!properties.has(SCHEMA_PROPERTY_NAME)) {
+            properties.putObject(SCHEMA_PROPERTY_NAME).put("type", "string")
+        }
+        if (schemaPropertyRequired.get()) {
+            val required = schema.withArray("/required")
+            if (required.none { it.asText() == SCHEMA_PROPERTY_NAME }) {
+                required.add(SCHEMA_PROPERTY_NAME)
+            }
         }
     }
 
@@ -203,5 +230,6 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
 
     companion object {
         const val TASK_NAME = "generateJsonSchema"
+        private const val SCHEMA_PROPERTY_NAME = "\$schema"
     }
 }

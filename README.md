@@ -106,6 +106,17 @@ jsonschemaGenerator {
         swagger2Enabled = false
     }
 
+    // Use this when you want to allow the `$schema` key in JSON/YAML instance documents,
+    // e.g. { "$schema": "https://example.com/YourSchema.json", "myKey": "myValue" }.
+    schemaProperty {
+        // Inject a `$schema` property (type: string) into the root of each generated schema.
+        // Default: false
+        enabled = true
+        // Also list `$schema` in the root `required` array. Only effective when enabled = true.
+        // Default: true
+        required = true
+    }
+
     // Use this when you want to treat a specific type as a different type.
     // It is useful when you are using something like a value object.
     // Default: empty

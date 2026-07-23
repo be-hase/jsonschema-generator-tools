@@ -29,6 +29,8 @@ abstract class JsonSchemaGeneratorExtension @Inject constructor(project: Project
 
     val modules: ModulesExtension = project.objects.newInstance(ModulesExtension::class.java)
 
+    val schemaProperty: SchemaPropertyExtension = project.objects.newInstance(SchemaPropertyExtension::class.java)
+
     val typeMappings: MapProperty<String, String> = project.objects.mapProperty(String::class.java, String::class.java)
 
     abstract val schemas: NamedDomainObjectContainer<SchemaExtension>
@@ -57,6 +59,11 @@ interface ModulesExtension {
     val jakartaValidationEnabled: Property<Boolean>
     val jakartaValidationOptions: SetProperty<JakartaValidationOption>
     val swagger2Enabled: Property<Boolean>
+}
+
+interface SchemaPropertyExtension {
+    val enabled: Property<Boolean>
+    val required: Property<Boolean>
 }
 
 interface S3Extension {

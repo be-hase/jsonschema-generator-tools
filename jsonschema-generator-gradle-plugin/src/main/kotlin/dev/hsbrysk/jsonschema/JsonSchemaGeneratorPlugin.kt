@@ -10,26 +10,11 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
     private lateinit var extension: JsonSchemaGeneratorExtension
     private lateinit var optionsExtension: OptionsExtension
     private lateinit var modulesExtension: ModulesExtension
+    private lateinit var schemaPropertyExtension: SchemaPropertyExtension
     private lateinit var s3Extension: S3Extension
 
     override fun apply(project: Project) {
-        extension = project.extensions.create("jsonschemaGenerator", JsonSchemaGeneratorExtension::class.java).apply {
-            optionPreset.convention(OptionPreset.PLAIN_JSON)
-            typeMappings.convention(emptyMap())
-            customConfigs.convention(emptyMap())
-        }
-        optionsExtension = extension.extensions.create("options", OptionsExtension::class.java).apply {
-            with.convention(emptySet())
-            without.convention(emptySet())
-        }
-        modulesExtension = extension.extensions.create("modules", ModulesExtension::class.java).apply {
-            jacksonEnabled.convention(false)
-            jacksonOptions.convention(emptySet())
-            jakartaValidationEnabled.convention(false)
-            jakartaValidationOptions.convention(emptySet())
-            swagger2Enabled.convention(false)
-        }
-        s3Extension = extension.extensions.create("s3", S3Extension::class.java)
+        createExtensions(project)
 
         project.configurations.create(CONFIGURATION_JSONSCHEMA_GENERATOR) { configuration ->
             configuration.isTransitive = true
@@ -51,6 +36,8 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
             task.jakartaValidationEnabled.set(modulesExtension.jakartaValidationEnabled)
             task.jakartaValidationOptions.set(modulesExtension.jakartaValidationOptions)
             task.swagger2Enabled.set(modulesExtension.swagger2Enabled)
+            task.schemaPropertyEnabled.set(schemaPropertyExtension.enabled)
+            task.schemaPropertyRequired.set(schemaPropertyExtension.required)
             task.typeMappings.set(extension.typeMappings)
             task.schemas.set(project.provider { extension.schemas.associate { it.name to it.target.get() } })
             task.customConfigs.set(extension.customConfigs)
@@ -74,6 +61,31 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
 
             task.dependsOn(generateJsonSchemaTask)
         }
+    }
+
+    private fun createExtensions(project: Project) {
+        extension = project.extensions.create("jsonschemaGenerator", JsonSchemaGeneratorExtension::class.java).apply {
+            optionPreset.convention(OptionPreset.PLAIN_JSON)
+            typeMappings.convention(emptyMap())
+            customConfigs.convention(emptyMap())
+        }
+        optionsExtension = extension.extensions.create("options", OptionsExtension::class.java).apply {
+            with.convention(emptySet())
+            without.convention(emptySet())
+        }
+        modulesExtension = extension.extensions.create("modules", ModulesExtension::class.java).apply {
+            jacksonEnabled.convention(false)
+            jacksonOptions.convention(emptySet())
+            jakartaValidationEnabled.convention(false)
+            jakartaValidationOptions.convention(emptySet())
+            swagger2Enabled.convention(false)
+        }
+        schemaPropertyExtension = extension.extensions.create("schemaProperty", SchemaPropertyExtension::class.java)
+            .apply {
+                enabled.convention(false)
+                required.convention(true)
+            }
+        s3Extension = extension.extensions.create("s3", S3Extension::class.java)
     }
 
     companion object {
