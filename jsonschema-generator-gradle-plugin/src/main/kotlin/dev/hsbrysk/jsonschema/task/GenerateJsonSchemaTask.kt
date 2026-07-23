@@ -126,16 +126,35 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
     // Allows instance documents to declare which schema they conform to via the `$schema` key.
     // See https://github.com/be-hase/jsonschema-generator-tools/issues/122
     private fun injectSchemaProperty(schema: ObjectNode) {
-        val properties = schema.withObject("/properties")
+        val target = resolveLocalRef(schema)
+        val properties = target.withObject("/properties")
         if (!properties.has(SCHEMA_PROPERTY_NAME)) {
             properties.putObject(SCHEMA_PROPERTY_NAME).put("type", "string")
         }
         if (schemaPropertyRequired.get()) {
-            val required = schema.withArray("/required")
+            val required = target.withArray("/required")
             if (required.none { it.asText() == SCHEMA_PROPERTY_NAME }) {
                 required.add(SCHEMA_PROPERTY_NAME)
             }
         }
+    }
+
+    // With Option.DEFINITION_FOR_MAIN_SCHEMA, the root is only a local `$ref` and the actual
+    // object schema lives under `definitions`/`$defs`, so follow the ref before injecting.
+    private fun resolveLocalRef(schema: ObjectNode): ObjectNode {
+        var current = schema
+        repeat(MAX_REF_RESOLUTION) {
+            val ref = current.path(REF_KEYWORD).asText("")
+            if (!ref.startsWith("#/")) {
+                return current
+            }
+            val resolved = schema.at(ref.substring(1))
+            if (resolved !is ObjectNode) {
+                return current
+            }
+            current = resolved
+        }
+        return current
     }
 
     private fun buildSchemaGenerator(classLoader: ClassLoader) = SchemaGenerator(
@@ -231,5 +250,7 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
     companion object {
         const val TASK_NAME = "generateJsonSchema"
         private const val SCHEMA_PROPERTY_NAME = "\$schema"
+        private const val REF_KEYWORD = "\$ref"
+        private const val MAX_REF_RESOLUTION = 10
     }
 }

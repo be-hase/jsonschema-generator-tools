@@ -88,6 +88,219 @@ class SchemaPropertyFunctionalTest {
     }
 
     @Test
+    fun `draft7 with definitionForMainSchema`() {
+        writeBuildFileWithOptions(
+            schemaVersion = "DRAFT_7",
+            options = "Option.DEFINITION_FOR_MAIN_SCHEMA",
+        )
+
+        GradleRunner.create()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withArguments("generateJsonSchema")
+            .build()
+
+        assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
+            .isEqualTo(
+                // language=json
+                """
+                {
+                  "${'$'}schema" : "http://json-schema.org/draft-07/schema#",
+                  "${'$'}ref" : "#/definitions/Person",
+                  "definitions" : {
+                    "Person" : {
+                      "type" : "object",
+                      "properties" : {
+                        "age" : {
+                          "type" : "integer"
+                        },
+                        "gender" : {
+                          "type" : "string"
+                        },
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "${'$'}schema" : {
+                          "type" : "string"
+                        }
+                      },
+                      "required" : [ "${'$'}schema" ]
+                    }
+                  }
+                }
+                """.trimIndent(),
+            )
+    }
+
+    @Test
+    fun `draft2020 with definitionForMainSchema`() {
+        writeBuildFileWithOptions(
+            schemaVersion = "DRAFT_2020_12",
+            options = "Option.DEFINITION_FOR_MAIN_SCHEMA",
+        )
+
+        GradleRunner.create()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withArguments("generateJsonSchema")
+            .build()
+
+        assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
+            .isEqualTo(
+                // language=json
+                """
+                {
+                  "${'$'}schema" : "https://json-schema.org/draft/2020-12/schema",
+                  "${'$'}ref" : "#/${'$'}defs/Person",
+                  "${'$'}defs" : {
+                    "Person" : {
+                      "type" : "object",
+                      "properties" : {
+                        "age" : {
+                          "type" : "integer"
+                        },
+                        "gender" : {
+                          "type" : "string"
+                        },
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "${'$'}schema" : {
+                          "type" : "string"
+                        }
+                      },
+                      "required" : [ "${'$'}schema" ]
+                    }
+                  }
+                }
+                """.trimIndent(),
+            )
+    }
+
+    @Test
+    fun `draft7 with definitionForMainSchema and forbiddenAdditionalProperties`() {
+        writeBuildFileWithOptions(
+            schemaVersion = "DRAFT_7",
+            options = "Option.DEFINITION_FOR_MAIN_SCHEMA, Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT",
+        )
+
+        GradleRunner.create()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withArguments("generateJsonSchema")
+            .build()
+
+        assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
+            .isEqualTo(
+                // language=json
+                """
+                {
+                  "${'$'}schema" : "http://json-schema.org/draft-07/schema#",
+                  "${'$'}ref" : "#/definitions/Person",
+                  "definitions" : {
+                    "Person" : {
+                      "type" : "object",
+                      "properties" : {
+                        "age" : {
+                          "type" : "integer"
+                        },
+                        "gender" : {
+                          "type" : "string"
+                        },
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "${'$'}schema" : {
+                          "type" : "string"
+                        }
+                      },
+                      "additionalProperties" : false,
+                      "required" : [ "${'$'}schema" ]
+                    }
+                  }
+                }
+                """.trimIndent(),
+            )
+    }
+
+    @Test
+    fun `draft2020 with definitionForMainSchema and forbiddenAdditionalProperties`() {
+        writeBuildFileWithOptions(
+            schemaVersion = "DRAFT_2020_12",
+            options = "Option.DEFINITION_FOR_MAIN_SCHEMA, Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT",
+        )
+
+        GradleRunner.create()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withArguments("generateJsonSchema")
+            .build()
+
+        assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
+            .isEqualTo(
+                // language=json
+                """
+                {
+                  "${'$'}schema" : "https://json-schema.org/draft/2020-12/schema",
+                  "${'$'}ref" : "#/${'$'}defs/Person",
+                  "${'$'}defs" : {
+                    "Person" : {
+                      "type" : "object",
+                      "properties" : {
+                        "age" : {
+                          "type" : "integer"
+                        },
+                        "gender" : {
+                          "type" : "string"
+                        },
+                        "name" : {
+                          "type" : "string"
+                        },
+                        "${'$'}schema" : {
+                          "type" : "string"
+                        }
+                      },
+                      "additionalProperties" : false,
+                      "required" : [ "${'$'}schema" ]
+                    }
+                  }
+                }
+                """.trimIndent(),
+            )
+    }
+
+    private fun writeBuildFileWithOptions(
+        schemaVersion: String,
+        options: String,
+    ) {
+        buildFile.writeText(
+            // language=kotlin
+            """
+            import com.github.victools.jsonschema.generator.Option
+            import com.github.victools.jsonschema.generator.SchemaVersion
+            plugins {
+                java
+                id("dev.hsbrysk.jsonschema-generator")
+            }
+            jsonschemaGenerator {
+                schemaVersion = SchemaVersion.$schemaVersion
+                options {
+                    with = setOf($options)
+                }
+                schemaProperty {
+                    enabled = true
+                }
+                schemas {
+                    create("Person") {
+                        target = "com.example.Person"
+                    }
+                }
+            }
+            """.trimIndent(),
+        )
+    }
+
+    @Test
     fun `enabled but not required`() {
         buildFile.writeText(
             // language=kotlin
