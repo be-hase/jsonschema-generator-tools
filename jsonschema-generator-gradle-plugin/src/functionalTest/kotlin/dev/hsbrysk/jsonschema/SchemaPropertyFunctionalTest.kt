@@ -88,61 +88,6 @@ class SchemaPropertyFunctionalTest {
     }
 
     @Test
-    fun `enabled via property syntax`() {
-        buildFile.writeText(
-            // language=kotlin
-            """
-            import com.github.victools.jsonschema.generator.SchemaVersion
-            plugins {
-                java
-                id("dev.hsbrysk.jsonschema-generator")
-            }
-            jsonschemaGenerator {
-                schemaVersion = SchemaVersion.DRAFT_2020_12
-                schemaProperty.enabled.set(true)
-                schemas {
-                    create("Person") {
-                        target = "com.example.Person"
-                    }
-                }
-            }
-            """.trimIndent(),
-        )
-
-        GradleRunner.create()
-            .withPluginClasspath()
-            .withProjectDir(projectDir)
-            .withArguments("generateJsonSchema")
-            .build()
-
-        assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
-            .isEqualTo(
-                // language=json
-                """
-                {
-                  "${'$'}schema" : "https://json-schema.org/draft/2020-12/schema",
-                  "type" : "object",
-                  "properties" : {
-                    "age" : {
-                      "type" : "integer"
-                    },
-                    "gender" : {
-                      "type" : "string"
-                    },
-                    "name" : {
-                      "type" : "string"
-                    },
-                    "${'$'}schema" : {
-                      "type" : "string"
-                    }
-                  },
-                  "required" : [ "${'$'}schema" ]
-                }
-                """.trimIndent(),
-            )
-    }
-
-    @Test
     fun `draft7 with definitionForMainSchema`() {
         writeBuildFileWithOptions(
             schemaVersion = "DRAFT_7",

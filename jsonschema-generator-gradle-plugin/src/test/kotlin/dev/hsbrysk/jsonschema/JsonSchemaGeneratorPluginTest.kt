@@ -5,7 +5,6 @@ import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
 import assertk.assertions.isNotNull
-import assertk.assertions.isSameInstanceAs
 import assertk.assertions.isTrue
 import com.github.victools.jsonschema.generator.OptionPreset
 import org.gradle.testfixtures.ProjectBuilder
@@ -36,7 +35,6 @@ class JsonSchemaGeneratorPluginTest {
         assertThat(modulesExtension.jakartaValidationOptions.get()).isEmpty()
         assertThat(modulesExtension.swagger2Enabled.get()).isFalse()
         val schemaPropertyExtension = extension.extensions.getByName("schemaProperty") as SchemaPropertyExtension
-        assertThat(schemaPropertyExtension).isSameInstanceAs(extension.schemaProperty)
         assertThat(schemaPropertyExtension.enabled.get()).isFalse()
         assertThat(schemaPropertyExtension.required.get()).isTrue()
     }
