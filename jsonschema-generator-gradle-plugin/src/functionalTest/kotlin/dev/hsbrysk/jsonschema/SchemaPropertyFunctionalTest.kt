@@ -269,6 +269,126 @@ class SchemaPropertyFunctionalTest {
             )
     }
 
+    @Test
+    fun `recursive model with draft7 definitionForMainSchema and forbiddenAdditionalProperties`() {
+        writeRecursivePersonJava()
+        writeBuildFileWithOptions(
+            schemaVersion = "DRAFT_7",
+            options = "Option.DEFINITION_FOR_MAIN_SCHEMA, Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT",
+        )
+
+        GradleRunner.create()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withArguments("generateJsonSchema")
+            .build()
+
+        // The `$schema` property must only be allowed/required at the root; the shared definition
+        // referenced by `child` must stay untouched.
+        assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
+            .isEqualTo(
+                // language=json
+                """
+                {
+                  "${'$'}schema" : "http://json-schema.org/draft-07/schema#",
+                  "definitions" : {
+                    "Person" : {
+                      "type" : "object",
+                      "properties" : {
+                        "child" : {
+                          "${'$'}ref" : "#/definitions/Person"
+                        },
+                        "name" : {
+                          "type" : "string"
+                        }
+                      },
+                      "additionalProperties" : false
+                    }
+                  },
+                  "type" : "object",
+                  "properties" : {
+                    "child" : {
+                      "${'$'}ref" : "#/definitions/Person"
+                    },
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "${'$'}schema" : {
+                      "type" : "string"
+                    }
+                  },
+                  "additionalProperties" : false,
+                  "required" : [ "${'$'}schema" ]
+                }
+                """.trimIndent(),
+            )
+    }
+
+    @Test
+    fun `recursive model with draft2020 definitionForMainSchema and forbiddenAdditionalProperties`() {
+        writeRecursivePersonJava()
+        writeBuildFileWithOptions(
+            schemaVersion = "DRAFT_2020_12",
+            options = "Option.DEFINITION_FOR_MAIN_SCHEMA, Option.FORBIDDEN_ADDITIONAL_PROPERTIES_BY_DEFAULT",
+        )
+
+        GradleRunner.create()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withArguments("generateJsonSchema")
+            .build()
+
+        // The `$schema` property must only be allowed/required at the root; the shared definition
+        // referenced by `child` must stay untouched.
+        assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
+            .isEqualTo(
+                // language=json
+                """
+                {
+                  "${'$'}schema" : "https://json-schema.org/draft/2020-12/schema",
+                  "${'$'}defs" : {
+                    "Person" : {
+                      "type" : "object",
+                      "properties" : {
+                        "child" : {
+                          "${'$'}ref" : "#/${'$'}defs/Person"
+                        },
+                        "name" : {
+                          "type" : "string"
+                        }
+                      },
+                      "additionalProperties" : false
+                    }
+                  },
+                  "type" : "object",
+                  "properties" : {
+                    "child" : {
+                      "${'$'}ref" : "#/${'$'}defs/Person"
+                    },
+                    "name" : {
+                      "type" : "string"
+                    },
+                    "${'$'}schema" : {
+                      "type" : "string"
+                    }
+                  },
+                  "additionalProperties" : false,
+                  "required" : [ "${'$'}schema" ]
+                }
+                """.trimIndent(),
+            )
+    }
+
+    private fun writeRecursivePersonJava() {
+        projectDir.resolve(Path("src", "main", "java", "com", "example", "Person.java").toFile()).writeText(
+            // language=java
+            """
+            package com.example;
+            public record Person(String name, Person child) {}
+            """.trimIndent(),
+        )
+    }
+
     private fun writeBuildFileWithOptions(
         schemaVersion: String,
         options: String,

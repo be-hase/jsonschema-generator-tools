@@ -1,5 +1,6 @@
 package dev.hsbrysk.jsonschema.task
 
+import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.victools.jsonschema.generator.Option
 import com.github.victools.jsonschema.generator.OptionPreset
@@ -141,6 +142,9 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
 
     // With Option.DEFINITION_FOR_MAIN_SCHEMA, the root is only a local `$ref` and the actual
     // object schema lives under `definitions`/`$defs`, so follow the ref before injecting.
+    // A definition referenced from anywhere else as well (e.g. a recursive model) must not be
+    // modified, because `$schema` should only be allowed/required at the root; in that case the
+    // definition is inlined into the root and the original is left untouched for other referrers.
     private fun resolveLocalRef(schema: ObjectNode): ObjectNode {
         var current = schema
         repeat(MAX_REF_RESOLUTION) {
@@ -152,9 +156,25 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
             if (resolved !is ObjectNode) {
                 return current
             }
+            if (countLocalRefs(schema, ref) > 1) {
+                current.remove(REF_KEYWORD)
+                current.setAll<ObjectNode>(resolved.deepCopy())
+                return current
+            }
             current = resolved
         }
         return current
+    }
+
+    private fun countLocalRefs(
+        node: JsonNode,
+        ref: String,
+    ): Int {
+        var count = if (node.path(REF_KEYWORD).asText("") == ref) 1 else 0
+        node.forEach { child ->
+            count += countLocalRefs(child, ref)
+        }
+        return count
     }
 
     private fun buildSchemaGenerator(classLoader: ClassLoader) = SchemaGenerator(
