@@ -5,8 +5,8 @@ import com.github.victools.jsonschema.generator.OptionPreset
 import com.github.victools.jsonschema.generator.SchemaGenerator
 import com.github.victools.jsonschema.generator.SchemaGeneratorConfigBuilder
 import com.github.victools.jsonschema.generator.SchemaVersion
-import com.github.victools.jsonschema.module.jackson.JacksonModule
 import com.github.victools.jsonschema.module.jackson.JacksonOption
+import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule
 import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationModule
 import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationOption
 import com.github.victools.jsonschema.module.swagger2.Swagger2Module
@@ -118,7 +118,7 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
         )
             .apply {
                 if (jacksonEnabled.get()) {
-                    with(JacksonModule(*jacksonOptions.get().toTypedArray()))
+                    with(JacksonSchemaModule(*jacksonOptions.get().toTypedArray()))
                 }
                 if (jakartaValidationEnabled.get()) {
                     with(JakartaValidationModule(*jakartaValidationOptions.get().toTypedArray()))

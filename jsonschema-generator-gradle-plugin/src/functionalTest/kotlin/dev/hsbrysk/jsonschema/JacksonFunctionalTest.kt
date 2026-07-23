@@ -41,7 +41,7 @@ class JacksonFunctionalTest {
                 id("dev.hsbrysk.jsonschema-generator")
             }
             dependencies {
-                implementation("com.fasterxml.jackson.core:jackson-databind:$JACKSON_VERSION")
+                implementation("tools.jackson.core:jackson-databind:$JACKSON_VERSION")
             }
             jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
@@ -190,7 +190,7 @@ class JacksonFunctionalTest {
                 id("dev.hsbrysk.jsonschema-generator")
             }
             dependencies {
-                implementation("com.fasterxml.jackson.core:jackson-databind:$JACKSON_VERSION")
+                implementation("tools.jackson.core:jackson-databind:$JACKSON_VERSION")
             }
             jsonschemaGenerator {
                 schemaVersion = SchemaVersion.DRAFT_2020_12
