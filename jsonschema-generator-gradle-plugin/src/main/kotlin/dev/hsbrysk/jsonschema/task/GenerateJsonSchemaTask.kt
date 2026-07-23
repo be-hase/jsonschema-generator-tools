@@ -1,5 +1,7 @@
 package dev.hsbrysk.jsonschema.task
 
+import com.fasterxml.jackson.databind.JsonNode
+import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.victools.jsonschema.generator.Option
 import com.github.victools.jsonschema.generator.OptionPreset
 import com.github.victools.jsonschema.generator.SchemaGenerator
@@ -69,6 +71,14 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
     abstract val swagger2Enabled: Property<Boolean>
 
     @get:Input
+    @get:Optional
+    abstract val schemaPropertyEnabled: Property<Boolean>
+
+    @get:Input
+    @get:Optional
+    abstract val schemaPropertyRequired: Property<Boolean>
+
+    @get:Input
     abstract val typeMappings: MapProperty<String, String>
 
     @get:Input
@@ -103,12 +113,68 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
         project.layout.buildDirectory.get().file("json-schemas").asFile.mkdirs()
         schemas.get().forEach { name, target ->
             val clazz = classLoader.loadClass(target)
-            val result = generator.generateSchema(clazz).toPrettyString()
+            val schema = generator.generateSchema(clazz)
+            if (schemaPropertyEnabled.get()) {
+                injectSchemaProperty(schema)
+            }
 
             val outPath = project.layout.buildDirectory.get().file("json-schemas/$name.json").asFile
-            outPath.writeText(result)
+            outPath.writeText(schema.toPrettyString())
             println("Generated JSON schema: ${outPath.absolutePath}")
         }
+    }
+
+    // Allows instance documents to declare which schema they conform to via the `$schema` key.
+    // See https://github.com/be-hase/jsonschema-generator-tools/issues/122
+    private fun injectSchemaProperty(schema: ObjectNode) {
+        val target = resolveLocalRef(schema)
+        val properties = target.withObject("/properties")
+        if (!properties.has(SCHEMA_PROPERTY_NAME)) {
+            properties.putObject(SCHEMA_PROPERTY_NAME).put("type", "string")
+        }
+        if (schemaPropertyRequired.get()) {
+            val required = target.withArray("/required")
+            if (required.none { it.asText() == SCHEMA_PROPERTY_NAME }) {
+                required.add(SCHEMA_PROPERTY_NAME)
+            }
+        }
+    }
+
+    // With Option.DEFINITION_FOR_MAIN_SCHEMA, the root is only a local `$ref` and the actual
+    // object schema lives under `definitions`/`$defs`, so follow the ref before injecting.
+    // A definition referenced from anywhere else as well (e.g. a recursive model) must not be
+    // modified, because `$schema` should only be allowed/required at the root; in that case the
+    // definition is inlined into the root and the original is left untouched for other referrers.
+    private fun resolveLocalRef(schema: ObjectNode): ObjectNode {
+        var current = schema
+        repeat(MAX_REF_RESOLUTION) {
+            val ref = current.path(REF_KEYWORD).asText("")
+            if (!ref.startsWith("#/")) {
+                return current
+            }
+            val resolved = schema.at(ref.substring(1))
+            if (resolved !is ObjectNode) {
+                return current
+            }
+            if (countLocalRefs(schema, ref) > 1) {
+                current.remove(REF_KEYWORD)
+                current.setAll<ObjectNode>(resolved.deepCopy())
+                return current
+            }
+            current = resolved
+        }
+        return current
+    }
+
+    private fun countLocalRefs(
+        node: JsonNode,
+        ref: String,
+    ): Int {
+        var count = if (node.path(REF_KEYWORD).asText("") == ref) 1 else 0
+        node.forEach { child ->
+            count += countLocalRefs(child, ref)
+        }
+        return count
     }
 
     private fun buildSchemaGenerator(classLoader: ClassLoader) = SchemaGenerator(
@@ -203,5 +269,8 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
 
     companion object {
         const val TASK_NAME = "generateJsonSchema"
+        private const val SCHEMA_PROPERTY_NAME = "\$schema"
+        private const val REF_KEYWORD = "\$ref"
+        private const val MAX_REF_RESOLUTION = 10
     }
 }
