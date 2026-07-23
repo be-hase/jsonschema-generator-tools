@@ -80,11 +80,13 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
             jakartaValidationOptions.convention(emptySet())
             swagger2Enabled.convention(false)
         }
-        schemaPropertyExtension = extension.extensions.create("schemaProperty", SchemaPropertyExtension::class.java)
-            .apply {
-                enabled.convention(false)
-                required.convention(true)
-            }
+        // Register the same instance as `JsonSchemaGeneratorExtension.schemaProperty`, so that both
+        // `schemaProperty { ... }` and `schemaProperty.enabled.set(...)` styles configure the task.
+        schemaPropertyExtension = extension.schemaProperty.apply {
+            enabled.convention(false)
+            required.convention(true)
+        }
+        extension.extensions.add(SchemaPropertyExtension::class.java, "schemaProperty", schemaPropertyExtension)
         s3Extension = extension.extensions.create("s3", S3Extension::class.java)
     }
 
