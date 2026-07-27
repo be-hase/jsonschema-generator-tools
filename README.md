@@ -119,6 +119,9 @@ jsonschemaGenerator {
 
     // Use this when you want to treat a specific type as a different type.
     // It is useful when you are using something like a value object.
+    // A mapping applies not only to the exact type but also to its subtypes/implementations.
+    // When multiple mappings match, the first one in the configured order wins,
+    // so put more specific types before broader ones.
     // Default: empty
     typeMappings = mapOf(
         "com.example.SecretString" to "java.lang.Integer",
