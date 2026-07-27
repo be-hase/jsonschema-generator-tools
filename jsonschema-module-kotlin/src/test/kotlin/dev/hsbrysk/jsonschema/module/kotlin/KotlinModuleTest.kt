@@ -95,10 +95,73 @@ class KotlinModuleTest {
             """.trimIndent(),
         )
     }
+
+    @Test
+    fun javaClass() {
+        val generator = SchemaGenerator(
+            SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON)
+                .with(KotlinModule(KotlinOption.USE_NULLABLE, KotlinOption.USE_REQUIRED_VIA_DEFAULT_ARGS))
+                .build(),
+        )
+        // Non-Kotlin classes must not crash; nullability and required fall back to the defaults
+        assertThat(generator.generateSchema(JavaPerson::class.java).toPrettyString()).isEqualTo(
+            """
+            {
+              "${'$'}schema" : "https://json-schema.org/draft/2020-12/schema",
+              "type" : "object",
+              "properties" : {
+                "age" : {
+                  "type" : "integer"
+                },
+                "name" : {
+                  "type" : "string"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+    }
+
+    @Test
+    fun classWithoutPrimaryConstructor() {
+        val generator = SchemaGenerator(
+            SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON)
+                .with(KotlinModule(KotlinOption.USE_NULLABLE, KotlinOption.USE_REQUIRED_VIA_DEFAULT_ARGS))
+                .build(),
+        )
+        // Without a primary constructor there is no default-argument information,
+        // so nothing is required; nullability still works via the property types
+        assertThat(generator.generateSchema(NoPrimaryConstructor::class.java).toPrettyString()).isEqualTo(
+            """
+            {
+              "${'$'}schema" : "https://json-schema.org/draft/2020-12/schema",
+              "type" : "object",
+              "properties" : {
+                "age" : {
+                  "type" : [ "integer", "null" ]
+                },
+                "name" : {
+                  "type" : "string"
+                }
+              }
+            }
+            """.trimIndent(),
+        )
+    }
 }
 
 data class Person(val name: String = "NONAME", val age: Int, val gender: String?)
 
 data class WithBodyProperty(val name: String = "NONAME", val age: Int) {
     val nickname: String = name
+}
+
+class NoPrimaryConstructor {
+    val name: String
+    val age: Int?
+
+    constructor(name: String, age: Int?) {
+        this.name = name
+        this.age = age
+    }
 }
