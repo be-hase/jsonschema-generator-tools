@@ -40,7 +40,7 @@ class SchemaPropertyDefinitionForMainSchemaFunctionalTest {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments("generateJsonSchema")
+            .withArguments("generateJsonSchema", "--configuration-cache")
             .build()
 
         assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
@@ -85,7 +85,7 @@ class SchemaPropertyDefinitionForMainSchemaFunctionalTest {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments("generateJsonSchema")
+            .withArguments("generateJsonSchema", "--configuration-cache")
             .build()
 
         assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
@@ -130,7 +130,7 @@ class SchemaPropertyDefinitionForMainSchemaFunctionalTest {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments("generateJsonSchema")
+            .withArguments("generateJsonSchema", "--configuration-cache")
             .build()
 
         assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
@@ -176,7 +176,7 @@ class SchemaPropertyDefinitionForMainSchemaFunctionalTest {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments("generateJsonSchema")
+            .withArguments("generateJsonSchema", "--configuration-cache")
             .build()
 
         assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
@@ -223,7 +223,7 @@ class SchemaPropertyDefinitionForMainSchemaFunctionalTest {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments("generateJsonSchema")
+            .withArguments("generateJsonSchema", "--configuration-cache")
             .build()
 
         // The `$schema` property must only be allowed/required at the root; the shared definition
@@ -278,7 +278,7 @@ class SchemaPropertyDefinitionForMainSchemaFunctionalTest {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments("generateJsonSchema")
+            .withArguments("generateJsonSchema", "--configuration-cache")
             .build()
 
         // The `$schema` property must only be allowed/required at the root; the shared definition

@@ -1,8 +1,10 @@
 package dev.hsbrysk.jsonschema
 
 import assertk.assertThat
+import assertk.assertions.contains
 import assertk.assertions.isEqualTo
 import org.gradle.testkit.runner.GradleRunner
+import org.gradle.testkit.runner.TaskOutcome
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.io.TempDir
@@ -63,7 +65,7 @@ class BasicFunctionalTest {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments("generateJsonSchema")
+            .withArguments("generateJsonSchema", "--configuration-cache")
             .build()
 
         assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
@@ -87,6 +89,33 @@ class BasicFunctionalTest {
                 }
                 """.trimIndent(),
             )
+
+        // Run again to verify that the stored configuration cache entry can be reused
+        // and that the declared output makes the task up-to-date.
+        val secondResult = GradleRunner.create()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withArguments("generateJsonSchema", "--configuration-cache")
+            .build()
+        assertThat(secondResult.output).contains("Reusing configuration cache.")
+        assertThat(secondResult.task(":generateJsonSchema")?.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+
+        // Changing an input must invalidate the up-to-date state and regenerate the schema.
+        projectDir.resolve(Path("src", "main", "java", "com", "example", "Person.java").toFile()).writeText(
+            // language=java
+            """
+            package com.example;
+            public record Person(String name, int age, String gender, String email) {}
+            """.trimIndent(),
+        )
+        val thirdResult = GradleRunner.create()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withArguments("generateJsonSchema", "--configuration-cache")
+            .build()
+        assertThat(thirdResult.task(":generateJsonSchema")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
+            .contains(""""email"""")
     }
 
     @Test
@@ -122,7 +151,7 @@ class BasicFunctionalTest {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments("generateJsonSchema")
+            .withArguments("generateJsonSchema", "--configuration-cache")
             .build()
 
         assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())

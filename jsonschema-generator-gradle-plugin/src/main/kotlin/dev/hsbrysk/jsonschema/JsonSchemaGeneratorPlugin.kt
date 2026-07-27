@@ -5,6 +5,9 @@ import dev.hsbrysk.jsonschema.task.GenerateJsonSchemaTask
 import dev.hsbrysk.jsonschema.task.UploadJsonSchemaToS3Task
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.plugins.JavaPlugin
+import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.tasks.SourceSet
 
 class JsonSchemaGeneratorPlugin : Plugin<Project> {
     private lateinit var extension: JsonSchemaGeneratorExtension
@@ -32,7 +35,7 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
             task.withOptions.set(optionsExtension.with)
             task.withoutOptions.set(optionsExtension.without)
             task.jacksonEnabled.set(modulesExtension.jacksonEnabled)
-            task.jacksonOptions.convention(modulesExtension.jacksonOptions)
+            task.jacksonOptions.set(modulesExtension.jacksonOptions)
             task.jakartaValidationEnabled.set(modulesExtension.jakartaValidationEnabled)
             task.jakartaValidationOptions.set(modulesExtension.jakartaValidationOptions)
             task.swagger2Enabled.set(modulesExtension.swagger2Enabled)
@@ -41,8 +44,20 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
             task.typeMappings.set(extension.typeMappings)
             task.schemas.set(project.provider { extension.schemas.associate { it.name to it.target.get() } })
             task.customConfigs.set(extension.customConfigs)
+            task.pluginClasspath.from(project.configurations.named(CONFIGURATION_JSONSCHEMA_GENERATOR))
+            task.outputDirectory.convention(project.layout.buildDirectory.dir(OUTPUT_DIRECTORY_NAME))
+        }
 
-            task.dependsOn("classes")
+        // The main source set's classpaths carry their own task dependencies (e.g. `classes`),
+        // so no explicit dependsOn is needed here.
+        project.plugins.withType(JavaPlugin::class.java) {
+            generateJsonSchemaTask.configure { task ->
+                val mainSourceSet = project.extensions.getByType(JavaPluginExtension::class.java)
+                    .sourceSets
+                    .getByName(SourceSet.MAIN_SOURCE_SET_NAME)
+                task.compileClasspath.from(mainSourceSet.compileClasspath)
+                task.runtimeClasspath.from(mainSourceSet.runtimeClasspath)
+            }
         }
 
         project.tasks.register(
@@ -59,7 +74,12 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
             task.requestChecksumCalculation.set(s3Extension.requestChecksumCalculation)
             task.responseChecksumValidation.set(s3Extension.responseChecksumValidation)
 
-            task.dependsOn(generateJsonSchemaTask)
+            // Wiring the generate task's output as an input also carries the task dependency.
+            task.schemaFiles.from(
+                generateJsonSchemaTask.flatMap { it.outputDirectory }.map { dir ->
+                    dir.asFileTree.matching { pattern -> pattern.include("*.json") }
+                },
+            )
         }
     }
 
@@ -90,5 +110,6 @@ class JsonSchemaGeneratorPlugin : Plugin<Project> {
 
     companion object {
         internal const val CONFIGURATION_JSONSCHEMA_GENERATOR = "jsonschemaGenerator"
+        internal const val OUTPUT_DIRECTORY_NAME = "json-schemas"
     }
 }

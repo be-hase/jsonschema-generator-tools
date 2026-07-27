@@ -10,17 +10,19 @@ import com.github.victools.jsonschema.module.jackson.JacksonSchemaModule
 import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationModule
 import com.github.victools.jsonschema.module.jakarta.validation.JakartaValidationOption
 import com.github.victools.jsonschema.module.swagger2.Swagger2Module
-import dev.hsbrysk.jsonschema.JsonSchemaGeneratorPlugin.Companion.CONFIGURATION_JSONSCHEMA_GENERATOR
 import dev.hsbrysk.jsonschema.ModuleProvider
 import org.gradle.api.DefaultTask
-import org.gradle.api.file.FileCollection
-import org.gradle.api.plugins.JavaPluginExtension
+import org.gradle.api.file.ConfigurableFileCollection
+import org.gradle.api.file.DirectoryProperty
 import org.gradle.api.provider.MapProperty
 import org.gradle.api.provider.Property
+import org.gradle.api.provider.Provider
 import org.gradle.api.provider.SetProperty
 import org.gradle.api.tasks.Classpath
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Internal
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.OutputDirectory
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
 import tools.jackson.databind.JsonNode
@@ -38,9 +40,15 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
     @get:Input
     abstract val schemaVersion: Property<SchemaVersion>
 
+    // OptionPreset is not Serializable, so it cannot be fingerprinted as an @Input directly;
+    // the enabled options are exposed via optionPresetOptions instead.
+    @get:Internal
+    abstract val optionPreset: Property<OptionPreset>
+
     @get:Input
     @get:Optional
-    abstract val optionPreset: Property<OptionPreset>
+    internal val optionPresetOptions: Provider<List<String>>
+        get() = optionPreset.map { preset -> Option.entries.filter(preset::isOptionEnabledByDefault).map(Option::name) }
 
     @get:Input
     @get:Optional
@@ -89,38 +97,34 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
     abstract val customConfigs: MapProperty<String, String>
 
     @get:Classpath
-    val compileClasspath: FileCollection
+    abstract val compileClasspath: ConfigurableFileCollection
 
     @get:Classpath
-    val runtimeClasspath: FileCollection
+    abstract val runtimeClasspath: ConfigurableFileCollection
 
     @get:Classpath
-    val pluginClasspath: FileCollection
+    abstract val pluginClasspath: ConfigurableFileCollection
 
-    init {
-        val javaExtension = project.extensions.getByType(JavaPluginExtension::class.java)
-        val mainSourceSet = javaExtension.sourceSets.getByName("main")
-        compileClasspath = mainSourceSet.compileClasspath
-        runtimeClasspath = mainSourceSet.runtimeClasspath
-        pluginClasspath = project.configurations.getByName(CONFIGURATION_JSONSCHEMA_GENERATOR)
-    }
+    @get:OutputDirectory
+    abstract val outputDirectory: DirectoryProperty
 
     @TaskAction
     fun generateJsonSchema() {
         val classLoader = buildClassLoader(mainDependencies() + pluginClasspath)
         val generator = buildSchemaGenerator(classLoader)
 
-        project.layout.buildDirectory.get().file("json-schemas").asFile.mkdirs()
-        schemas.get().forEach { name, target ->
+        val outputDir = outputDirectory.get().asFile
+        outputDir.mkdirs()
+        schemas.get().forEach { (name, target) ->
             val clazz = classLoader.loadClass(target)
             val schema = generator.generateSchema(clazz)
             if (schemaPropertyEnabled.get()) {
                 injectSchemaProperty(schema)
             }
 
-            val outPath = project.layout.buildDirectory.get().file("json-schemas/$name.json").asFile
+            val outPath = outputDir.resolve("$name.json")
             outPath.writeText(schema.toPrettyString())
-            println("Generated JSON schema: ${outPath.absolutePath}")
+            logger.lifecycle("Generated JSON schema: ${outPath.absolutePath}")
         }
     }
 
@@ -235,10 +239,7 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
         }
     }
 
-    // We will refer to the jar built within a Gradle project as `builtJar`.
-    private val builtJarMatcher = FileSystems.getDefault().getPathMatcher("glob:**/build/libs/*.jar")
-
-    fun isBuiltJar(path: Path): Boolean = builtJarMatcher.matches(path)
+    fun isBuiltJar(path: Path): Boolean = BUILT_JAR_MATCHER.matches(path)
 
     fun findClassesAndResourcesFromBuildJar(path: Path): List<File> {
         // **/build/libs/*.jar -> **/build
@@ -272,5 +273,9 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
         private const val SCHEMA_PROPERTY_NAME = "\$schema"
         private const val REF_KEYWORD = "\$ref"
         private const val MAX_REF_RESOLUTION = 10
+
+        // We will refer to the jar built within a Gradle project as `builtJar`.
+        // Kept out of the task instance so that the configuration cache does not try to serialize it.
+        private val BUILT_JAR_MATCHER = FileSystems.getDefault().getPathMatcher("glob:**/build/libs/*.jar")
     }
 }

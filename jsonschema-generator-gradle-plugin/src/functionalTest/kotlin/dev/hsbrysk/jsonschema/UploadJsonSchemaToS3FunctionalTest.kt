@@ -1,7 +1,9 @@
 package dev.hsbrysk.jsonschema
 
 import assertk.assertThat
+import assertk.assertions.contains
 import assertk.assertions.isEqualTo
+import assertk.assertions.isFalse
 import assertk.assertions.isNull
 import com.sun.net.httpserver.HttpServer
 import org.gradle.testkit.runner.GradleRunner
@@ -129,7 +131,7 @@ class UploadJsonSchemaToS3FunctionalTest {
         val result = GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments(UPLOAD_TASK_NAME)
+            .withArguments(UPLOAD_TASK_NAME, "--configuration-cache")
             .build()
 
         // Running the upload task alone must trigger compilation and schema generation first
@@ -144,6 +146,17 @@ class UploadJsonSchemaToS3FunctionalTest {
             .isEqualTo(projectDir.resolve(Path("build", "json-schemas", "Address.json").toFile()).readText())
         assertThat(puts[1].body)
             .isEqualTo(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
+
+        // Run again to verify that the stored configuration cache entry can be reused for the upload
+        // task, whose properties include non-trivial AWS SDK types (Region, checksum settings).
+        val secondResult = GradleRunner.create()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withArguments(UPLOAD_TASK_NAME, "--configuration-cache")
+            .build()
+        assertThat(secondResult.output).contains("Reusing configuration cache.")
+        assertThat(secondResult.task(":$UPLOAD_TASK_NAME")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(recordedRequests.count { it.method == "PUT" }).isEqualTo(4)
     }
 
     @Test
@@ -184,7 +197,7 @@ class UploadJsonSchemaToS3FunctionalTest {
         val result = GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments(UPLOAD_TASK_NAME)
+            .withArguments(UPLOAD_TASK_NAME, "--configuration-cache")
             .build()
 
         assertThat(result.task(":$UPLOAD_TASK_NAME")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
@@ -192,6 +205,57 @@ class UploadJsonSchemaToS3FunctionalTest {
         val puts = recordedRequests.filter { it.method == "PUT" && it.path.endsWith("Person.json") }
         assertThat(puts.map { it.path }).isEqualTo(listOf("/test-bucket/schemas/v1/Person.json"))
         assertThat(puts[0].acl).isEqualTo("public-read")
+    }
+
+    @Test
+    fun `upload with custom output directory`() {
+        buildFile.writeText(
+            // language=kotlin
+            """
+            import com.github.victools.jsonschema.generator.SchemaVersion
+            import dev.hsbrysk.jsonschema.task.GenerateJsonSchemaTask
+            import software.amazon.awssdk.core.checksums.RequestChecksumCalculation
+            import software.amazon.awssdk.regions.Region
+            plugins {
+                java
+                id("dev.hsbrysk.jsonschema-generator")
+            }
+            jsonschemaGenerator {
+                schemaVersion = SchemaVersion.DRAFT_2020_12
+                schemas {
+                    create("Person") {
+                        target = "com.example.Person"
+                    }
+                }
+                s3 {
+                    accessKeyId = "dummy-access-key"
+                    secretAccessKey = "dummy-secret-key"
+                    region = Region.US_EAST_1
+                    endpoint = "http://127.0.0.1:${server.address.port}"
+                    bucket = "test-bucket"
+                    requestChecksumCalculation = RequestChecksumCalculation.WHEN_REQUIRED
+                }
+            }
+            tasks.named<GenerateJsonSchemaTask>("generateJsonSchema") {
+                outputDirectory = layout.buildDirectory.dir("custom-schemas")
+            }
+            """.trimIndent(),
+        )
+
+        val result = GradleRunner.create()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withArguments(UPLOAD_TASK_NAME, "--configuration-cache")
+            .build()
+
+        assertThat(result.task(":$UPLOAD_TASK_NAME")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+
+        // The custom output directory must be used for generation and flow through to the upload task
+        val customOut = projectDir.resolve(Path("build", "custom-schemas", "Person.json").toFile())
+        assertThat(projectDir.resolve(Path("build", "json-schemas").toFile()).exists()).isFalse()
+        val puts = recordedRequests.filter { it.method == "PUT" && it.path.endsWith("Person.json") }
+        assertThat(puts.map { it.path }).isEqualTo(listOf("/test-bucket/Person.json"))
+        assertThat(puts[0].body).isEqualTo(customOut.readText())
     }
 
     companion object {

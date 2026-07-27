@@ -88,7 +88,7 @@ class MultiProjectFunctionalTest {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments("generateJsonSchema")
+            .withArguments("generateJsonSchema", "--configuration-cache")
             .build()
         assertThat(
             projectDir.resolve(Path("three", "build", "json-schemas", "Person.json").toFile()).readText(),
@@ -183,7 +183,7 @@ class MultiProjectFunctionalTest {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments("generateJsonSchema")
+            .withArguments("generateJsonSchema", "--configuration-cache")
             .build()
         assertThat(
             projectDir.resolve(Path("three", "build", "json-schemas", "Person.json").toFile()).readText(),
