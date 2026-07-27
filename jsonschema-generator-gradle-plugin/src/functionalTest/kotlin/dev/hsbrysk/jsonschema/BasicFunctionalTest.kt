@@ -99,6 +99,23 @@ class BasicFunctionalTest {
             .build()
         assertThat(secondResult.output).contains("Reusing configuration cache.")
         assertThat(secondResult.task(":generateJsonSchema")?.outcome).isEqualTo(TaskOutcome.UP_TO_DATE)
+
+        // Changing an input must invalidate the up-to-date state and regenerate the schema.
+        projectDir.resolve(Path("src", "main", "java", "com", "example", "Person.java").toFile()).writeText(
+            // language=java
+            """
+            package com.example;
+            public record Person(String name, int age, String gender, String email) {}
+            """.trimIndent(),
+        )
+        val thirdResult = GradleRunner.create()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withArguments("generateJsonSchema", "--configuration-cache")
+            .build()
+        assertThat(thirdResult.task(":generateJsonSchema")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())
+            .contains(""""email"""")
     }
 
     @Test
