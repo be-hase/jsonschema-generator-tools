@@ -1,7 +1,5 @@
 package dev.hsbrysk.jsonschema.task
 
-import com.fasterxml.jackson.databind.JsonNode
-import com.fasterxml.jackson.databind.node.ObjectNode
 import com.github.victools.jsonschema.generator.Option
 import com.github.victools.jsonschema.generator.OptionPreset
 import com.github.victools.jsonschema.generator.SchemaGenerator
@@ -25,6 +23,8 @@ import org.gradle.api.tasks.Input
 import org.gradle.api.tasks.Optional
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
+import tools.jackson.databind.JsonNode
+import tools.jackson.databind.node.ObjectNode
 import java.io.File
 import java.net.URLClassLoader
 import java.nio.file.FileSystems
@@ -134,7 +134,7 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
         }
         if (schemaPropertyRequired.get()) {
             val required = target.withArray("/required")
-            if (required.none { it.asText() == SCHEMA_PROPERTY_NAME }) {
+            if (required.none { it.asString("") == SCHEMA_PROPERTY_NAME }) {
                 required.add(SCHEMA_PROPERTY_NAME)
             }
         }
@@ -148,7 +148,7 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
     private fun resolveLocalRef(schema: ObjectNode): ObjectNode {
         var current = schema
         repeat(MAX_REF_RESOLUTION) {
-            val ref = current.path(REF_KEYWORD).asText("")
+            val ref = current.path(REF_KEYWORD).asString("")
             if (!ref.startsWith("#/")) {
                 return current
             }
@@ -158,7 +158,7 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
             }
             if (countLocalRefs(schema, ref) > 1) {
                 current.remove(REF_KEYWORD)
-                current.setAll<ObjectNode>(resolved.deepCopy())
+                current.setAll(resolved.deepCopy())
                 return current
             }
             current = resolved
@@ -170,7 +170,7 @@ abstract class GenerateJsonSchemaTask : DefaultTask() {
         node: JsonNode,
         ref: String,
     ): Int {
-        var count = if (node.path(REF_KEYWORD).asText("") == ref) 1 else 0
+        var count = if (node.path(REF_KEYWORD).asString("") == ref) 1 else 0
         node.forEach { child ->
             count += countLocalRefs(child, ref)
         }
