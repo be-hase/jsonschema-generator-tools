@@ -1,6 +1,7 @@
 package dev.hsbrysk.jsonschema
 
 import assertk.assertThat
+import assertk.assertions.contains
 import assertk.assertions.isEmpty
 import assertk.assertions.isEqualTo
 import assertk.assertions.isFalse
@@ -37,5 +38,16 @@ class JsonSchemaGeneratorPluginTest {
         val schemaPropertyExtension = extension.extensions.getByName("schemaProperty") as SchemaPropertyExtension
         assertThat(schemaPropertyExtension.enabled.get()).isFalse()
         assertThat(schemaPropertyExtension.required.get()).isTrue()
+    }
+
+    @Test
+    fun `task dependencies are wired`() {
+        val project = ProjectBuilder.builder().build()
+        project.plugins.apply("java")
+        project.plugins.apply("dev.hsbrysk.jsonschema-generator")
+
+        val uploadTask = project.tasks.getByName("uploadJsonSchemaToS3")
+        assertThat(uploadTask.taskDependencies.getDependencies(uploadTask).map { it.name })
+            .contains("generateJsonSchema")
     }
 }
