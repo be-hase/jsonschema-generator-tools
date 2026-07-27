@@ -202,14 +202,14 @@ class UploadJsonSchemaToS3FunctionalTest {
         private fun decodeAwsChunked(raw: String): String {
             val decoded = StringBuilder()
             var index = 0
-            while (index < raw.length) {
-                val headerEnd = raw.indexOf("\r\n", index)
-                if (headerEnd == -1) break
+            var headerEnd = raw.indexOf("\r\n", index)
+            while (headerEnd != -1) {
                 val size = raw.substring(index, headerEnd).substringBefore(';').toInt(16)
                 if (size == 0) break
                 val dataStart = headerEnd + 2
                 decoded.append(raw, dataStart, dataStart + size)
                 index = dataStart + size + 2
+                headerEnd = raw.indexOf("\r\n", index)
             }
             return decoded.toString()
         }
