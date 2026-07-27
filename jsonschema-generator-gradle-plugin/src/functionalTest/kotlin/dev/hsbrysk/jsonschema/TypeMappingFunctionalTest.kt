@@ -84,4 +84,126 @@ class TypeMappingFunctionalTest {
                 """.trimIndent(),
             )
     }
+
+    @Test
+    fun `supertype matching`() {
+        buildFile.writeText(
+            // language=kotlin
+            """
+            import com.github.victools.jsonschema.generator.SchemaVersion
+            plugins {
+                java
+                id("dev.hsbrysk.jsonschema-generator")
+            }
+            jsonschemaGenerator {
+                schemaVersion = SchemaVersion.DRAFT_2020_12
+                typeMappings = mapOf(
+                    "java.time.temporal.TemporalAmount" to "java.lang.String",
+                )
+                schemas {
+                    create("Times") {
+                        target = "com.example.Times"
+                    }
+                }
+            }
+            """.trimIndent(),
+        )
+
+        projectDir.resolve(Path("src", "main", "java", "com", "example").toFile()).mkdirs()
+        projectDir.resolve(Path("src", "main", "java", "com", "example", "Times.java").toFile()).writeText(
+            // language=java
+            """
+            package com.example;
+            import java.time.Duration;
+            import java.time.Period;
+            public record Times(Duration timeout, Period period) {}
+            """.trimIndent(),
+        )
+
+        GradleRunner.create()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withArguments("generateJsonSchema", "--configuration-cache")
+            .build()
+
+        // Both Duration and Period implement TemporalAmount, so the mapping applies to both
+        assertThat(projectDir.resolve(Path("build", "json-schemas", "Times.json").toFile()).readText())
+            .isEqualTo(
+                // language=json
+                """
+                {
+                  "${'$'}schema" : "https://json-schema.org/draft/2020-12/schema",
+                  "type" : "object",
+                  "properties" : {
+                    "period" : {
+                      "type" : "string"
+                    },
+                    "timeout" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+                """.trimIndent(),
+            )
+    }
+
+    @Test
+    fun `configured-order precedence`() {
+        buildFile.writeText(
+            // language=kotlin
+            """
+            import com.github.victools.jsonschema.generator.SchemaVersion
+            plugins {
+                java
+                id("dev.hsbrysk.jsonschema-generator")
+            }
+            jsonschemaGenerator {
+                schemaVersion = SchemaVersion.DRAFT_2020_12
+                typeMappings = mapOf(
+                    "java.time.temporal.TemporalAmount" to "java.lang.String",
+                    "java.time.Duration" to "java.lang.Integer",
+                )
+                schemas {
+                    create("Times") {
+                        target = "com.example.Times"
+                    }
+                }
+            }
+            """.trimIndent(),
+        )
+
+        projectDir.resolve(Path("src", "main", "java", "com", "example").toFile()).mkdirs()
+        projectDir.resolve(Path("src", "main", "java", "com", "example", "Times.java").toFile()).writeText(
+            // language=java
+            """
+            package com.example;
+            import java.time.Duration;
+            public record Times(Duration timeout) {}
+            """.trimIndent(),
+        )
+
+        GradleRunner.create()
+            .withPluginClasspath()
+            .withProjectDir(projectDir)
+            .withArguments("generateJsonSchema", "--configuration-cache")
+            .build()
+
+        // The first configured mapping wins even when a more specific mapping exists later:
+        // Duration is matched by TemporalAmount -> String, not by Duration -> Integer.
+        assertThat(projectDir.resolve(Path("build", "json-schemas", "Times.json").toFile()).readText())
+            .isEqualTo(
+                // language=json
+                """
+                {
+                  "${'$'}schema" : "https://json-schema.org/draft/2020-12/schema",
+                  "type" : "object",
+                  "properties" : {
+                    "timeout" : {
+                      "type" : "string"
+                    }
+                  }
+                }
+                """.trimIndent(),
+            )
+    }
 }

@@ -65,6 +65,40 @@ class KotlinModuleTest {
             """.trimIndent(),
         )
     }
+
+    @Test
+    fun useRequiredViaDefaultArgsWithBodyProperty() {
+        val generator = SchemaGenerator(
+            SchemaGeneratorConfigBuilder(SchemaVersion.DRAFT_2020_12, OptionPreset.PLAIN_JSON)
+                .with(KotlinModule(KotlinOption.USE_REQUIRED_VIA_DEFAULT_ARGS))
+                .build(),
+        )
+        // A property declared in the class body is not a constructor parameter, so it must not be required
+        assertThat(generator.generateSchema(WithBodyProperty::class.java).toPrettyString()).isEqualTo(
+            """
+            {
+              "${'$'}schema" : "https://json-schema.org/draft/2020-12/schema",
+              "type" : "object",
+              "properties" : {
+                "age" : {
+                  "type" : "integer"
+                },
+                "name" : {
+                  "type" : "string"
+                },
+                "nickname" : {
+                  "type" : "string"
+                }
+              },
+              "required" : [ "age" ]
+            }
+            """.trimIndent(),
+        )
+    }
 }
 
 data class Person(val name: String = "NONAME", val age: Int, val gender: String?)
+
+data class WithBodyProperty(val name: String = "NONAME", val age: Int) {
+    val nickname: String = name
+}
