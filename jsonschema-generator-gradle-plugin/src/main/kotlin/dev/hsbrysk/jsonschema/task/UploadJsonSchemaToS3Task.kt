@@ -1,9 +1,13 @@
 package dev.hsbrysk.jsonschema.task
 
 import org.gradle.api.DefaultTask
+import org.gradle.api.file.ConfigurableFileCollection
 import org.gradle.api.provider.Property
 import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.InputFiles
 import org.gradle.api.tasks.Optional
+import org.gradle.api.tasks.PathSensitive
+import org.gradle.api.tasks.PathSensitivity
 import org.gradle.api.tasks.TaskAction
 import org.gradle.work.DisableCachingByDefault
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials
@@ -53,15 +57,17 @@ abstract class UploadJsonSchemaToS3Task : DefaultTask() {
     @get:Optional
     abstract val responseChecksumValidation: Property<ResponseChecksumValidation>
 
+    @get:InputFiles
+    @get:PathSensitive(PathSensitivity.NAME_ONLY)
+    abstract val schemaFiles: ConfigurableFileCollection
+
     @TaskAction
     fun uploadJsonSchemaToS3() {
         val bucket = bucket.get()
         val dir = dir.orNull?.removeSuffix("/")
 
         buildS3Client().use { s3Client ->
-            val files = project.layout.buildDirectory.dir("json-schemas").get().asFileTree
-                .matching { it.include("*.json") }
-            files.forEach { file ->
+            schemaFiles.forEach { file ->
                 s3Client.putObject(
                     PutObjectRequest.builder()
                         .bucket(bucket)

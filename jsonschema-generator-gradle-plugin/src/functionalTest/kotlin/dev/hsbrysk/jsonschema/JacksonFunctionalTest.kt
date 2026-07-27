@@ -123,7 +123,7 @@ class JacksonFunctionalTest {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments("generateJsonSchema")
+            .withArguments("generateJsonSchema", "--configuration-cache")
             .build()
 
         assertThat(projectDir.resolve(Path("build", "json-schemas", "Pojo.json").toFile()).readText())
@@ -252,7 +252,7 @@ class JacksonFunctionalTest {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments("generateJsonSchema")
+            .withArguments("generateJsonSchema", "--configuration-cache")
             .build()
 
         assertThat(projectDir.resolve(Path("build", "json-schemas", "Pojo.json").toFile()).readText())

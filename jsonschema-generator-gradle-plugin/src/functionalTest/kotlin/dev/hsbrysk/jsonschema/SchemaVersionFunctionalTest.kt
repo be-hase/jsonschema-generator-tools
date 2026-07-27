@@ -54,7 +54,7 @@ class SchemaVersionFunctionalTest {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments("generateJsonSchema")
+            .withArguments("generateJsonSchema", "--configuration-cache")
             .build()
 
         assertThat(projectDir.resolve(Path("build", "json-schemas", "Person.json").toFile()).readText())

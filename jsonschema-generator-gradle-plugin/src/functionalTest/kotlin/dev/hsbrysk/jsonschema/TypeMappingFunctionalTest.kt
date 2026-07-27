@@ -59,7 +59,7 @@ class TypeMappingFunctionalTest {
         GradleRunner.create()
             .withPluginClasspath()
             .withProjectDir(projectDir)
-            .withArguments("generateJsonSchema")
+            .withArguments("generateJsonSchema", "--configuration-cache")
             .build()
 
         assertThat(projectDir.resolve(Path("build", "json-schemas", "Options.json").toFile()).readText())
