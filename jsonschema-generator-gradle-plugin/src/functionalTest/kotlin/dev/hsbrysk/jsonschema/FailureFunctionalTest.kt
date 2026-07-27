@@ -138,6 +138,7 @@ class FailureFunctionalTest {
 
         // Schema generation itself succeeds; only the upload task fails on the missing bucket
         assertThat(result.task(":generateJsonSchema")?.outcome).isEqualTo(TaskOutcome.SUCCESS)
+        assertThat(result.task(":uploadJsonSchemaToS3")?.outcome).isEqualTo(TaskOutcome.FAILED)
         assertThat(result.output).contains("bucket")
     }
 }
